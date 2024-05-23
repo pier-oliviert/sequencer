@@ -1,0 +1,49 @@
+apiVersion: se.quencer.io/v1alpha1
+kind: Component
+metadata:
+  labels:
+    app.kubernetes.io/name: component
+    app.kubernetes.io/instance: component-sample
+    app.kubernetes.io/part-of: sequencer
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: sequencer
+  name: component-sample
+  namespace: sequencer-system
+spec:
+  name: click-mania
+  template:
+    spec:
+      containers:
+        - name: click
+          image: ${build::clickaroo}
+          ports:
+            - containerPort: 3000
+          command:
+            - /srv/aurora-test
+            - start
+
+  networks:
+    - name: http
+      port: 3000
+      targetPort: 3000
+  build:
+    name: clickaroo
+    dockerfile: Dockerfile
+    containerRegistries:
+      - url: pothibo/sequencer-buildresult
+        tags:
+          - foo
+          - bar
+        credentials:
+          authScheme: keyPair
+          secretRef:
+            name: dockerhub-credentials
+    importContent:
+      - credentials:
+          authScheme: token
+          secretRef:
+            name: github-credentials
+        contentFrom:
+          git:
+            ref: main
+            url: git@github.com:pier-oliviert/cookie-clicker.git

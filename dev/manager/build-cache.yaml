@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: build-cache.yml
+  namespace: system
+data:
+  config.yml: |
+    version: 0.1
+    delete:
+      enabled: true
+    log:
+      level: info
+      fields:
+        service: registry
+    storage:
+      cache:
+        blobdescriptor: inmemory
+      filesystem:
+        rootdirectory: /var/lib/registry
+    http:
+      addr: :5000
+      headers:
+        X-Content-Type-Options: [nosniff]
+      tls:
+        certificate: /srv/certs/tls.crt
+        key: /srv/certs/tls.key
+    maintenance:
+      uploadpurging:
+        enabled: false
+    health:
+      storagedriver:
+        enabled: true
+        interval: 10s
+        threshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: build-cache
+    app.kubernetes.io/instance: system
+    app.kubernetes.io/component: distribution
+    app.kubernetes.io/created-by: sequencer
+    app.kubernetes.io/part-of: sequencer
+    app.kubernetes.io/managed-by: kustomize
+  name: build-cache
+spec:
+  selector:
+    app.kubernetes.io/name: build-cache
+  ports:
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: build-cache
+    app.kubernetes.io/instance: system
+    app.kubernetes.io/component: manager
+    app.kubernetes.io/created-by: sequencer
+    app.kubernetes.io/part-of: sequencer
+    app.kubernetes.io/managed-by: kustomize
+  name: build-cache
+  namespace: system
+spec:
+  selector:
+    matchLabels:
+      control-plane: build-cache
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: distribution
+        ad.datadoghq.com/distribution.logs: '[{"source": "go", "service": "sequencer.build-cache"}]'
+      labels:
+        control-plane: build-cache
+        app.kubernetes.io/name: build-cache
+    spec:
+      containers:
+      - image: registry:latest
+        env:
+        name: distribution
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 4Gi
+          requests:
+            cpu: 400m
+            memory: 2Gi
+        volumeMounts:
+        - mountPath: /cache
+          name: cache-volume
+        - mountPath: /srv/certs
+          name: certs
+        - mountPath: /etc/docker/registry
+          name: distribution-config
+      volumes:
+      - name: cache-volume
+        emptyDir:
+          sizeLimit: 8Gi
+      - name: certs
+        secret:
+          secretName: distribution-cert
+      - name: distribution-config
+        configMap:
+          name: sequencer-build-cache.yml
+      serviceAccountName: controller-manager
+      terminationGracePeriodSeconds: 10

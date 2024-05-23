@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "operator.fullname" . }}-distribution
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "operator.labels" . | nindent 4 }}
+spec:
+  dnsNames:
+  - '{{ include "operator.fullname" . }}-build-cache.{{ .Release.Namespace }}.svc.{{
+    .Values.kubernetesClusterDomain }}'
+  - '{{ include "operator.fullname" . }}-docker-cache.{{ .Release.Namespace }}.svc.{{
+    .Values.kubernetesClusterDomain }}'
+  duration: 2160h
+  issuerRef:
+    kind: Issuer
+    name: '{{ include "operator.fullname" . }}-selfsigned-issuer'
+  renewBefore: 360h
+  secretName: distribution-cert

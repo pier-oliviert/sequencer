@@ -1,0 +1,23 @@
+# This kustomization.yaml is not intended to be run by itself,
+# since it depends on service name and namespace that are out of this kustomize package.
+# It should be run by config/default
+resources:
+- bases/se.quencer.io_workspaces.yaml
+- bases/se.quencer.io_builds.yaml
+- bases/se.quencer.io_components.yaml
+#+kubebuilder:scaffold:crdkustomizeresource
+
+patches:
+- path: patches/webhook_in_builds.yaml
+# Only Builds have webhook configured at this time.
+# - path: patches/webhook_in_workspaces.yaml
+# - path: patches/webhook_in_components.yaml
+#+kubebuilder:scaffold:crdkustomizewebhookpatch
+
+- path: patches/cainjection_in_workspaces.yaml
+- path: patches/cainjection_in_builds.yaml
+- path: patches/cainjection_in_components.yaml
+#+kubebuilder:scaffold:crdkustomizecainjectionpatch
+
+configurations:
+- kustomizeconfig.yaml

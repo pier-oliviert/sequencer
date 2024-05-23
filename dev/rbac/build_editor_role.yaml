@@ -1,0 +1,31 @@
+# permissions for end users to edit builds.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: build-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: sequencer
+    app.kubernetes.io/part-of: sequencer
+    app.kubernetes.io/managed-by: kustomize
+  name: build-editor-role
+rules:
+- apiGroups:
+  - se.quencer.io
+  resources:
+  - builds
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - se.quencer.io
+  resources:
+  - builds/status
+  verbs:
+  - get

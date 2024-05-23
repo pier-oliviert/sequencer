@@ -1,0 +1,36 @@
+apiVersion: se.quencer.io/v1alpha1
+kind: Build
+metadata:
+  labels:
+    app.kubernetes.io/name: build
+    app.kubernetes.io/instance: build-sample
+    app.kubernetes.io/part-of: sequencer
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: sequencer
+  name: build-sample
+  namespace: sequencer-system
+spec:
+  name: clicker
+  tags:
+    - foo
+    - bar
+  target:
+  context: .
+  dockerfile: Dockerfile
+  args:
+  secrets:
+  containerRegistries:
+    - url: pothibo/sequencer-buildresult
+      credentials:
+        authScheme: keyPair
+        secretRef:
+          name: dockerhub-credentials
+  importContent:
+    - contentFrom:
+        credentials:
+          authScheme: token
+          secretRef:
+            name: github-credentials
+        git:
+          ref: main
+          url: https://github.com/pier-oliviert/cookie-clicker.git

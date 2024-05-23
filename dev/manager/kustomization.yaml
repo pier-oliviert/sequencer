@@ -1,0 +1,17 @@
+resources:
+- build-cache.yaml
+- docker-cache.yaml
+- manager.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: controller
+  newName: controller
+  newTag: latest
+configMapGenerator:
+- literals:
+  - BUILDER_IMAGE=builder:dev
+  - BUILDKIT_VERSION=v0.12.4
+  - CONTROLLER_SERVICE_ACCOUNT=sequencer-controller-manager
+  - BUILDKITD_CONFIG_NAME=sequencer-buildkitd
+  name: controller-manager

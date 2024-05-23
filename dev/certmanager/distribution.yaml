@@ -1,0 +1,24 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: distribution
+  namespace: system
+  labels:
+    app.kubernetes.io/name: distribution-certificate
+    app.kubernetes.io/instance: distribution
+    app.kubernetes.io/component: distribution-certificate
+    app.kubernetes.io/created-by: sequencer
+    app.kubernetes.io/part-of: sequencer
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Secret names are always required.
+  secretName: distribution-cert
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  dnsNames:
+  #TODO: Change this to use kustomize values once I know how.
+  - sequencer-build-cache.sequencer-system.svc.cluster.local
+  - sequencer-docker-cache.sequencer-system.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: selfsigned-issuer

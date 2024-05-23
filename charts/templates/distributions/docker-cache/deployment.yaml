@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "operator.fullname" . }}-docker-cache
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "operator.fullname" . }}-docker-cache
+    app.kubernetes.io/component: distribution
+    app.kubernetes.io/created-by: {{ include "operator.fullname" . }}
+    app.kubernetes.io/part-of: {{ include "operator.fullname" . }}
+    control-plane: controller-manager
+spec:
+  replicas: {{ .Values.distribution.dockerCache.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "operator.fullname" . }}-docker-cache
+      app.kubernetes.io/component: distribution
+      app.kubernetes.io/created-by: {{ include "operator.fullname" . }}
+      app.kubernetes.io/part-of: {{ include "operator.fullname" . }}
+      control-plane: docker-cache
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "operator.fullname" . }}-docker-cache
+        app.kubernetes.io/component: distribution
+        app.kubernetes.io/created-by: {{ include "operator.fullname" . }}
+        app.kubernetes.io/part-of: {{ include "operator.fullname" . }}
+        control-plane: docker-cache
+      annotations:
+        ad.datadoghq.com/distribution.logs: '[{"source": "go", "service": "sequencer.docker-cache"}]'
+        kubectl.kubernetes.io/default-container: distribution
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.distribution.image.repository }}:{{ .Values.distribution.image.tag
+          | default .Chart.AppVersion }}
+        name: distribution
+        resources: {{- toYaml .Values.distribution.dockerCache.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /cache
+          name: cache-volume
+        - mountPath: /srv/certs
+          name: certs
+        - mountPath: /etc/docker/registry
+          name: distribution-config
+      serviceAccountName: {{ include "operator.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - emptyDir:
+          sizeLimit: 8Gi
+        name: cache-volume
+      - name: certs
+        secret:
+          secretName: distribution-cert
+      - configMap:
+          name: {{ include "operator.fullname" . }}-docker-cache.yml
+        name: distribution-config
