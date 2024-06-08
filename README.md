@@ -1,5 +1,130 @@
 # What is Sequencer?
-Sequencer is a Open Source Kubernetes [Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) that manages previews of your production application. Users of PaaS like Heroku and Vercel are familiar with the concept of running sequencer environments for testing and QA purposes. You can now to do the same, wherever your infrastructure lives. You can go from zero to a fully deployed application all within Kubernetes.
+Sequencer is a Open Source Kubernetes [Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) that manages previews of your production application. Users of PaaS like Heroku and Vercel are familiar with the concept of running ephemeral environments for testing and QA purposes. You can now to do the same, wherever your infrastructure lives. **You can go from zero to a fully deployed application all within your own Kubernetes cluster**.
+
+Imagine you have an application that has a MySQL database and a Redis cache, you'd like each PR to have a preview application deployed, it doesn't have to have all the bell and whistles a production environment would have, but you'd like to have the application _behave_ like one.
+
+You'd like to have the application deployed with the latest change from the branch you're working on too. You probably already have a Dockerfile that can build this for you. Here's the template you'd create, for this application:
+
+```yaml
+apiVersion: se.quencer.io/v1alpha1
+kind: Workspace
+metadata:
+  labels:
+    app.kubernetes.io/instance: workspace-sample
+    app.kubernetes.io/managed-by: sequencer
+    app.kubernetes.io/created-by: sequencer
+  generateName: workspace-sample-
+  namespace: sequencer-system
+spec:
+  networking:
+    cloudflare:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: apiKey
+      dns:
+        zoneName: $(YOUR_ACCOUNT_ID)
+        zoneId: $(YOUR_ZONE_ID)
+      tunnel:
+        connector: cloudflared
+        accountId: $(YOUR_ACCOUNT_ID)
+        route:
+          component: myapp
+          network: http
+  components:
+    - name: redis
+      networks:
+        - name: tcp
+          port: 6379
+          targetPort: 6379
+      template:
+        containers:
+          - name: redis
+            image: redis:latest
+            ports: 
+              - containerPort: 6379
+    - name: mysql
+      networks:
+        - name: tcp
+          port: 3306
+          targetPort: 3306
+      template:
+        containers:
+          - name: mysql
+            image: mysql:latest
+            env:
+              - name: MYSQL_RANDOM_ROOT_PASSWORD
+                value: "true"
+              - name: MYSQL_PASSWORD
+                value: coolpassword1234
+              - name: MYSQL_USER
+                value: theuser
+              - name: MYSQL_DATABASE
+                value: mydb
+            ports: 
+              - containerPort: 3306
+    - name: click-mania
+      dependsOn:
+        - componentName: mysql
+          conditionType: Pod
+          conditionStatus: Healthy
+        - componentName: redis
+          conditionType: Pod
+          conditionStatus: Healthy
+      template:
+        containers:
+          - name: click
+            image: ${build::myapp}
+            ports:
+              - containerPort: 3000
+            env:
+              - name: DB_HOST
+                value: ${components::mysql.networks.tcp}
+              - name: REDIS_HOST
+                value: ${components::redis.networks.tcp}
+              - name: MYSQL_PASSWORD
+                value: coolpassword1234
+              - name: MYSQL_USER
+                value: theuser
+              - name: MYSQL_DATABASE
+                value: mydb
+            command:
+              - /srv/aurora-test
+              - start
+      networks:
+        - name: http
+          port: 3000
+          targetPort: 3000
+      build:
+        name: myapp
+        dockerfile: Dockerfile
+        containerRegistries:
+          - url: myuser/ephemeralbuilds
+            tags:
+              - dev
+            credentials:
+              authScheme: keyPair
+              secretRef:
+                name: dockerhub-credentials
+        importContent:
+          - credentials:
+              authScheme: token
+              secretRef:
+                name: github-credentials
+            contentFrom:
+              git:
+                ref: PR-2303-my-feature-branch
+                url: git@github.com:myuser/myapp.git
+```
+
+Sequencer will take care of everything, it will
+
+1. Build an image of your application using the `PR-2303-my-feature-branch`
+2. Push the image to your container registries so Kubernetes can use the image
+3. Create a unique DNS entry as an entry point for your application
+4. Create a Cloudflare Tunnel (Zero trust), and connect the tunnel to your DNS entry & your application
+5. Deploy all the dependencies, and interpolate variables so your application has all the information to connect to MySQL and Redis.
+
+![Your application running](./docs/images/k9s-workspace-demo.png)
 
 ## ⚠️ Technical preview ⚠️
 This project is still very early on and as such, should be considered a technical preview. Building and deploying applications involve many independent features that need to work in concert to bring your application up. Because of the overall complexity, it's expected that you'll hit edge cases along the way and if _when_ do, please open up an Issue.
