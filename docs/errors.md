@@ -17,6 +17,8 @@ Errors that happened while building an image for a workspace. Most of these erro
 |1005|*Builds are immutable*|Something tried to update or patch the Build custom Resource. This operator is not possible as builds wouldn't know what to do.|
 |1006|*Invalid secret for the credentials' authScheme*|The secret doesn't fit the format specified by the [`authScheme`](./specs/build.md#credentials) the content of the secret needs to be an exact match as described in the reference|
 |1007|*Secret could not be retrieved*|The secret could not be retrieved, the secret's name is set by the user, was it created in the same namespace, ie. `sequencer-system`?|
+|1008|*No pod dispatched for the build*|Sequencer tried to dispatch a pod to run the build, but it failed. Could there be a permission issue within Kubernetes? If you don't know how you got there, you can file an [issue](https://github.com/pier-oliviert/sequencer/issues)|
+|1009|*Pod had an unexpected failure*|The pod running the build crashed before the pod had time to update the status and conditions of the Build custom resource. This can be caused by a bug with Buildkit. You can look at the logs of the pod to see what happened. If you feel this is a bug with Sequencer, you can create an [issue](https://github.com/pier-oliviert/sequencer/issues)|
 
 ## Networking Errors
 ## Workspace Errors

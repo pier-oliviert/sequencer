@@ -142,7 +142,7 @@ func (r *PodReconciler) configureContainerForCredentials(ctx context.Context, bu
 		var secret core.Secret
 
 		if err := r.Get(ctx, key, &secret); err != nil {
-			return nil, nil, err
+			return nil, nil, fmt.Errorf("E#1007: Could not retrieve the secret as specified in the spec -- %w", err)
 		}
 
 		if !ic.Credentials.IsValidForSecret(&secret) {

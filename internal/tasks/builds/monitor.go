@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	ErrUnexpectedPodFailure = errors.New("#ETODO pod had an unexpected failure")
+	ErrUnexpectedPodFailure = errors.New("#E1009 pod had an unexpected failure")
 )
 
 type MonitorReconciler struct {
@@ -29,7 +29,7 @@ func (r *MonitorReconciler) Reconcile(ctx context.Context, build *sequencer.Buil
 	if conditions.IsAnyConditionWithStatus(build.Status.Conditions, conditions.ConditionError) {
 		if build.Status.Phase != builds.PhaseError {
 			if build.Status.PodRef == nil {
-				return nil, errors.New("E#TODO: No pod dispatched for the build, does the operator have the right permission?")
+				return nil, errors.New("E#1008: No pod dispatched for the build, does the operator have the right permission?")
 			}
 
 			podDescriptor := build.Status.PodRef.NamespacedName()
