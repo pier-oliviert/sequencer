@@ -62,7 +62,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, build *sequencer.Build) (
 
 	volumes, mounts, err := r.configureContainerForCredentials(ctx, build)
 	if err != nil {
-		return nil, fmt.Errorf("E#TODO: Could not attach credentials to the build -- %w", err)
+		return nil, err
 	}
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
 	container.VolumeMounts = append(container.VolumeMounts, mounts...)
@@ -106,11 +106,11 @@ func (r *PodReconciler) configureContainerForCredentials(ctx context.Context, bu
 		var secret core.Secret
 
 		if err := r.Get(ctx, key, &secret); err != nil {
-			return nil, nil, err
+			return nil, nil, fmt.Errorf("E#1007: Could not retrieve the secret as specified in the spec -- %w", err)
 		}
 
 		if !cr.Credentials.IsValidForSecret(&secret) {
-			return nil, nil, fmt.Errorf("E#TODO: Secret is not valid for the credential authScheme: %s", cr.Credentials.AuthScheme)
+			return nil, nil, fmt.Errorf("E#1006: Secret is not valid for the credential authScheme: %s", cr.Credentials.AuthScheme)
 		}
 
 		mounts = append(mounts, core.VolumeMount{
@@ -146,7 +146,7 @@ func (r *PodReconciler) configureContainerForCredentials(ctx context.Context, bu
 		}
 
 		if !ic.Credentials.IsValidForSecret(&secret) {
-			return nil, nil, fmt.Errorf("E#TODO: Secret is not valid for the credential authScheme: %s", ic.Credentials.AuthScheme)
+			return nil, nil, fmt.Errorf("E#1006: Secret is not valid for the credential authScheme: %s", ic.Credentials.AuthScheme)
 		}
 
 		mounts = append(mounts, core.VolumeMount{

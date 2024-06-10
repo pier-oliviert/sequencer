@@ -33,13 +33,13 @@ var _ webhook.Validator = &Build{}
 var ErrContentFromMissing = field.Error{
 	Type:   field.ErrorTypeInvalid,
 	Field:  "ContentFrom",
-	Detail: "E#TODO: ContentFrom is nil, only Git sources are supported at the moment",
+	Detail: "E#1003: ContentFrom is nil, only Git sources are supported at the moment",
 }
 
 var ErrContainerRegistryEmpty = field.Error{
 	Type:   field.ErrorTypeInvalid,
 	Field:  "containerRegistries",
-	Detail: "E#TODO: containerRegistries is empty, need to export the build to at least one container registry",
+	Detail: "E#1004: containerRegistries is empty, need to export the build to at least one container registry",
 }
 
 func (b *Build) ValidateCreate() (admission.Warnings, error) {
@@ -69,7 +69,7 @@ func (b *Build) ValidateCreate() (admission.Warnings, error) {
 }
 
 func (b *Build) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	return nil, errors.New("E#TODO: builds are immutable")
+	return nil, errors.New("E#1005: builds are immutable")
 }
 
 func (b *Build) ValidateDelete() (admission.Warnings, error) {
