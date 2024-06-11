@@ -45,12 +45,12 @@ func newCloudflareProvider(ctx context.Context, controller integrations.Provider
 
 	token, ok := secret.Data[secretKeyRef.Key]
 	if !ok {
-		return nil, fmt.Errorf("E#TODO: secret %s doesn't include a value at key %s", secret.Name, secretKeyRef.Key)
+		return nil, fmt.Errorf("E#3004: secret %s doesn't have a value at key %s", secret.Name, secretKeyRef.Key)
 	}
 
 	api, err := cloudflare.NewWithAPIToken(string(token))
 	if err != nil {
-		return nil, fmt.Errorf("E#TODO: %w", err)
+		return nil, fmt.Errorf("E#3007: Could not create new Cloudflare Client -- %w", err)
 	}
 
 	return &cf{
@@ -80,7 +80,7 @@ func (c cf) Reconcile(ctx context.Context) (_ *ctrl.Result, err error) {
 		return &ctrl.Result{}, c.Guard(ctx, "Creating DNS Record on Cloudflare", func() (conditions.ConditionStatus, string, error) {
 			record, err := c.createRecordFromTunnel(ctx, status.Tunnel)
 			if err != nil {
-				return "", "", fmt.Errorf("E#TODO: Could not create a Cloudflare DNS record -- %w", err)
+				return "", "", fmt.Errorf("E#3005: Could not create a Cloudflare DNS record -- %w", err)
 			}
 
 			status.DNS = &workspaces.DNS{
@@ -118,8 +118,8 @@ func (c cf) Terminate(ctx context.Context) (_ *ctrl.Result, err error) {
 	return nil, c.Guard(ctx, "Deleting DNS records from Cloudflare", func() (status conditions.ConditionStatus, reason string, err error) {
 		err = c.api.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), providerMeta[kCloudflareRecordIDKey])
 		if err != nil {
-			logger.Error(err, "E#TODO: Could not delete the DNS record", "ID", providerMeta[kCloudflareRecordIDKey])
-			c.Eventf(core.EventTypeWarning, string(c.Condition().Type), "E#TODO: Could not delete the DNS record (ID: %s) -- %s", providerMeta[kCloudflareRecordIDKey], err.Error())
+			logger.Error(err, "E#3006: Could not delete the DNS record", "ID", providerMeta[kCloudflareRecordIDKey])
+			c.Eventf(core.EventTypeWarning, string(c.Condition().Type), "E#3006: Could not delete the DNS record (ID: %s) -- %s", providerMeta[kCloudflareRecordIDKey], err.Error())
 			return "", "", err
 		}
 		return conditions.ConditionTerminated, "DNS deleted on Cloudflare", c.RemoveFinalizer(ctx, kCloudflareDNSFinalizer)

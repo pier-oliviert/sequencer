@@ -70,7 +70,7 @@ func (r *DependenciesReconciler) setup(ctx context.Context, component *sequencer
 func (r *DependenciesReconciler) watch(ctx context.Context, component *sequencer.Component) (*ctrl.Result, error) {
 	selector, err := labels.Parse(fmt.Sprintf("%s=%s", workspaces.InstanceLabel, component.Labels[workspaces.InstanceLabel]))
 	if err != nil {
-		return nil, fmt.Errorf("E#TODO: failed to parse the label selector -- %w", err)
+		return nil, fmt.Errorf("E#3001: failed to parse the label selector -- %w", err)
 	}
 
 	var list sequencer.ComponentList
@@ -85,11 +85,7 @@ func (r *DependenciesReconciler) watch(ctx context.Context, component *sequencer
 			Reason: "Error loading dependencies",
 		})
 
-		if err := r.Status().Update(ctx, component); err != nil {
-			return nil, err
-		}
-
-		return nil, err
+		return nil, r.Status().Update(ctx, component)
 	}
 
 	conditions.SetStatusCondition(&component.Status.Conditions, r.conditionForDependency(list.Items, component))

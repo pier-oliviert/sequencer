@@ -26,7 +26,7 @@ type ComponentsReconciler struct {
 func (r *ComponentsReconciler) ReconcileComponentHealth(ctx context.Context, workspace *sequencer.Workspace) (*ctrl.Result, error) {
 	selector, err := labels.Parse(fmt.Sprintf("%s=%s", workspaces.InstanceLabel, workspace.Name))
 	if err != nil {
-		return nil, fmt.Errorf("E#TODO: failed to parse the label selector -- %w", err)
+		return nil, fmt.Errorf("E#3001: failed to parse the label selector -- %w", err)
 	}
 
 	// Let's load all the components for this
@@ -57,11 +57,8 @@ func (r *ComponentsReconciler) ReconcileComponentHealth(ctx context.Context, wor
 			workspace.Status.Phase = workspaces.PhaseError
 
 			r.Eventf(workspace, core.EventTypeWarning, "Components", "Component (%s) has failed", component.Name)
-			if err := r.Status().Update(ctx, workspace); err != nil {
-				return nil, err
-			}
 
-			return &ctrl.Result{}, nil
+			return &ctrl.Result{}, r.Status().Update(ctx, workspace)
 		}
 	}
 
@@ -123,7 +120,7 @@ func (r *ComponentsReconciler) Reconcile(ctx context.Context, workspace *sequenc
 				return nil, err
 			}
 
-			return nil, fmt.Errorf("E#TODO: Error creating component (%s) -- %w", component.Name, err)
+			return nil, fmt.Errorf("E#3002: Error creating component (%s) -- %w", component.Name, err)
 		}
 	}
 

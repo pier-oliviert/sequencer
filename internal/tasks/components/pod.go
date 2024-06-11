@@ -139,7 +139,7 @@ func (p *PodReconciler) assignInterpolatedVariables(spec *core.PodSpec, componen
 			}
 
 			if !found {
-				return fmt.Errorf("E#TODO: Could not find a variable to interpolate for %s", container.Image)
+				return fmt.Errorf("E#2001: Could not find a variable to interpolate for %s", container.Image)
 			}
 		}
 
@@ -154,7 +154,7 @@ func (p *PodReconciler) assignInterpolatedVariables(spec *core.PodSpec, componen
 					}
 				}
 				if !found {
-					return fmt.Errorf("E#TODO: Could not find a variable to interpolate for %s", env.Value)
+					return fmt.Errorf("E#2001: Could not find a variable to interpolate for %s", env.Value)
 				}
 			}
 		}
@@ -168,7 +168,7 @@ func (p *PodReconciler) monitorPod(ctx context.Context, component *sequencer.Com
 
 	selector, err := labels.Parse(fmt.Sprintf("%s=%s", components.InstanceLabel, component.Name))
 	if err != nil {
-		return fmt.Errorf("E#TODO: failed to parse the label selector -- %w", err)
+		return fmt.Errorf("E#3001: failed to parse the label selector -- %w", err)
 	}
 
 	err = p.List(ctx, list, &client.ListOptions{
@@ -177,15 +177,15 @@ func (p *PodReconciler) monitorPod(ctx context.Context, component *sequencer.Com
 	})
 
 	if err != nil {
-		return fmt.Errorf("E#TODO: failure to retrieve a list of pods for component (%s) -- Label Selector: %s", component.Name, selector.String())
+		return fmt.Errorf("E#5002: failure to retrieve a list of pods for component (%s) -- Label Selector: %s", component.Name, selector.String())
 	}
 
 	if len(list.Items) != 1 {
 		if len(list.Items) == 0 {
-			return fmt.Errorf("E#TODO: no pod scheduled for component (%s)", component.Name)
+			return fmt.Errorf("E#2003: no pod exists for component (%s)", component.Name)
 		}
 
-		return fmt.Errorf("E#TODO: Expected to retrieve a single pod for component (%s), got %d. Label Selector: %s", component.Name, list.Size(), selector.String())
+		return fmt.Errorf("E#2004: Expected to retrieve a single pod for component (%s), got %d. Label Selector: %s", component.Name, list.Size(), selector.String())
 	}
 
 	pod := list.Items[0]
@@ -193,7 +193,7 @@ func (p *PodReconciler) monitorPod(ctx context.Context, component *sequencer.Com
 	for _, cs := range pod.Status.ContainerStatuses {
 		if cs.State.Terminated != nil {
 			if cs.State.Terminated.ExitCode != 0 {
-				return fmt.Errorf("E#TODO: Pod (%s) had a failure in one of the container (%s) -- Reason: %s", pod.Name, cs.Name, cs.State.Terminated.Reason)
+				return fmt.Errorf("E#2005: Pod (%s) had a failure in one of the container (%s) -- Reason: %s", pod.Name, cs.Name, cs.State.Terminated.Reason)
 			}
 		}
 	}

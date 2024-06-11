@@ -75,7 +75,7 @@ func Git(ctx context.Context, opts ...RepositoryOption) (*Repository, error) {
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("E#TODO: Git error during checkout: %w", err)
+		return nil, fmt.Errorf("E#1015: Git error during checkout: %w", err)
 	}
 
 	return repo, nil
@@ -121,7 +121,7 @@ func WithPath(path string) RepositoryOption {
 func WithAuth(path string, credentials *config.Credentials) RepositoryOption {
 	return func(r *Repository) error {
 		if credentials.AuthScheme != config.SingleToken {
-			return fmt.Errorf("E#TODO: Only auth scheme supported for Git is SingleToken (privateKey): %s", credentials.AuthScheme)
+			return fmt.Errorf("E#1016: Only auth scheme supported for Git is SingleToken (privateKey): %s", credentials.AuthScheme)
 		}
 
 		file := filepath.Join(path, *credentials.Name, "privateKey")

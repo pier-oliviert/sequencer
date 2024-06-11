@@ -14,7 +14,7 @@ func NewProvider(ctx context.Context, controller integrations.ProviderController
 		return newCloudflareProvider(ctx, controller)
 	}
 
-	return nil, errors.New("E#TODO: The tunnel spec doesn't include a valid provider")
+	return nil, errors.New("E#3012: The tunnel spec doesn't include a valid provider")
 }
 
 func IncludesTunnelSpec(spec workspaces.NetworkingSpec) bool {

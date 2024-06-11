@@ -21,7 +21,7 @@ import (
 )
 
 var resolverParser = regexp.MustCompile(`^\${([a-zA-Z]+)::((?:[a-zA-Z]+\.?)+)}`)
-var ErrNotAResolvableValue = errors.New("E#TODO: Variable couldn't be parsed")
+var ErrNotAResolvableValue = errors.New("E#2006: Variable couldn't be parsed")
 
 type VariablesReconciler struct {
 	client.Client
@@ -158,7 +158,7 @@ func newResolver(content string, component *sequencer.Component) (variableResolv
 		}, nil
 	}
 
-	return nil, fmt.Errorf("E#TODO: no resolver exists for (%s)", string(parsed[1]))
+	return nil, fmt.Errorf("E#2007: no resolver exists for (%s)", string(parsed[1]))
 }
 
 type variableResolver interface {
@@ -177,7 +177,7 @@ func (br buildResolver) Value(ctx context.Context, c client.Client) (string, err
 
 	selector, err := labels.Parse(fmt.Sprintf("%s=%s", components.NameLabel, br.componentName))
 	if err != nil {
-		return "", fmt.Errorf("E#TODO: failed to parse the label selector -- %w", err)
+		return "", fmt.Errorf("E#3001: failed to parse the label selector -- %w", err)
 	}
 
 	err = c.List(ctx, list, &client.ListOptions{
@@ -186,11 +186,11 @@ func (br buildResolver) Value(ctx context.Context, c client.Client) (string, err
 	})
 
 	if err != nil {
-		return "", fmt.Errorf("E#TODO: failed to find a build using the reference stored in the component -- %w", err)
+		return "", fmt.Errorf("E#5002: failed to find a build using the reference stored in the component -- %w", err)
 	}
 
 	if len(list.Items) == 0 {
-		return "", fmt.Errorf("E#TODO: failed to find a build using the reference stored in the component (%s)", br.componentName)
+		return "", fmt.Errorf("E#2008: failed to find a build using the reference stored in the component (%s)", br.componentName)
 	}
 
 	var build *sequencer.Build
@@ -202,7 +202,7 @@ func (br buildResolver) Value(ctx context.Context, c client.Client) (string, err
 	}
 
 	if build == nil {
-		return "", fmt.Errorf("E#TODO: Failed to find a build within component(%s) that has the name (%s)", br.componentName, br.buildName)
+		return "", fmt.Errorf("E#2009: Failed to find a build within component(%s) that has the name (%s)", br.componentName, br.buildName)
 	}
 
 	var name, digest string
@@ -210,7 +210,7 @@ func (br buildResolver) Value(ctx context.Context, c client.Client) (string, err
 		indexManifest, err := image.ParseIndexManifest()
 
 		if err != nil {
-			return "", fmt.Errorf("E#TODO: failed to decode the index manifest -- %w", err)
+			return "", fmt.Errorf("E#2010: failed to decode the index manifest -- %w", err)
 		}
 
 		for _, manifest := range indexManifest.Manifests {
@@ -227,7 +227,7 @@ func (br buildResolver) Value(ctx context.Context, c client.Client) (string, err
 	}
 
 	if name == "" || digest == "" {
-		return "", errors.New("E#TODO: Build referenced by the component don't include a valid image")
+		return "", errors.New("E#2011: Build referenced by the component don't include a valid image")
 	}
 
 	return fmt.Sprintf("%s@%s", name, digest), nil
@@ -242,18 +242,18 @@ type serviceResolver struct {
 
 func (sr serviceResolver) Value(ctx context.Context, c client.Client) (string, error) {
 	if len(sr.params) != 3 {
-		return "", fmt.Errorf("E#TODO: Unexpected value. Expected format `${components::componentName.section.serviceName}`, got %s", sr.content)
+		return "", fmt.Errorf("E#2012: Unexpected value. Expected format `${components::componentName.section.serviceName}`, got %s", sr.content)
 	}
 
 	if sr.Section() != "networks" {
-		return "", errors.New("E#TODO: Invalid section, only supported sections are: networks")
+		return "", errors.New("E#2013: Invalid section, only supported sections are: networks")
 	}
 
 	var service *core.Service
 
 	selector, err := labels.Parse(fmt.Sprintf("%s=%s", workspaces.InstanceLabel, sr.workspaceName))
 	if err != nil {
-		return "", fmt.Errorf("E#TODO: failed to parse the label selector -- %w", err)
+		return "", fmt.Errorf("E#3001: failed to parse the label selector -- %w", err)
 	}
 
 	var list core.ServiceList
@@ -273,7 +273,7 @@ func (sr serviceResolver) Value(ctx context.Context, c client.Client) (string, e
 	}
 
 	if service == nil {
-		return "", fmt.Errorf("E#TODO: couldn't find a service for matching %s=%s & %s=%s", components.InstanceLabel, sr.ComponentName(), components.NetworkLabel, sr.NetworkName())
+		return "", fmt.Errorf("E#2008: couldn't find a service for matching %s=%s & %s=%s", components.InstanceLabel, sr.ComponentName(), components.NetworkLabel, sr.NetworkName())
 	}
 
 	return resolverParser.ReplaceAllString(sr.content, fmt.Sprintf("%s.%s.svc.cluster.local", service.Name, service.Namespace)), nil
@@ -301,12 +301,12 @@ type ingressResolver struct {
 func (ir ingressResolver) Value(ctx context.Context, c client.Client) (string, error) {
 	var ingress *networking.Ingress
 	if len(ir.params) > 2 {
-		return "", fmt.Errorf("E#TODO: Unexpected value. Expected format `${ingress::subdomain?.ingressName}`, got `%s`", ir.content)
+		return "", fmt.Errorf("E#2012: Unexpected value. Expected format `${ingress::subdomain?.ingressName}`, got `%s`", ir.content)
 	}
 
 	selector, err := labels.Parse(fmt.Sprintf("%s=%s", workspaces.InstanceLabel, ir.workspaceName))
 	if err != nil {
-		return "", fmt.Errorf("E#TODO: failed to parse the label selector -- %w", err)
+		return "", fmt.Errorf("E#3001: failed to parse the label selector -- %w", err)
 	}
 
 	var list networking.IngressList
@@ -326,7 +326,7 @@ func (ir ingressResolver) Value(ctx context.Context, c client.Client) (string, e
 	}
 
 	if ingress == nil {
-		return "", fmt.Errorf("E#TODO: couldn't find an ingress for matching %s=%s & %s=%s", workspaces.InstanceLabel, ir.workspaceName, workspaces.IngressLabel, ir.RuleName())
+		return "", fmt.Errorf("E#2008: couldn't find an ingress for matching %s=%s & %s=%s", workspaces.InstanceLabel, ir.workspaceName, workspaces.IngressLabel, ir.RuleName())
 	}
 
 	if ir.HasSubdomain() {

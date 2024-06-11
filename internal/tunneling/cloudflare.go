@@ -2,7 +2,6 @@ package tunneling
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -41,9 +40,6 @@ type cf struct {
 
 func newCloudflareProvider(ctx context.Context, controller integrations.ProviderController) (integrations.Provider, error) {
 	spec := controller.Workspace().Spec.Networking.Cloudflare
-	if spec.Tunnel == nil {
-		return nil, errors.New("E#TODO: Cloudflare spec does not include a tunnel spec")
-	}
 
 	var secret core.Secret
 	namespacedName := types.NamespacedName{
@@ -62,12 +58,12 @@ func newCloudflareProvider(ctx context.Context, controller integrations.Provider
 
 	token, ok := secret.Data[spec.SecretKeyRef.Key]
 	if !ok {
-		return nil, fmt.Errorf("E#TODO: secret %s doesn't include a value at key %s", secret.Name, spec.SecretKeyRef.Key)
+		return nil, fmt.Errorf("E#3004: secret %s doesn't include a value at key %s", secret.Name, spec.SecretKeyRef.Key)
 	}
 
 	api, err := cloudflare.NewWithAPIToken(string(token))
 	if err != nil {
-		return nil, fmt.Errorf("E#TODO: %w", err)
+		return nil, fmt.Errorf("E#3007: Could not create new Cloudflare Client -- %w", err)
 	}
 
 	return &cf{
@@ -126,7 +122,7 @@ func (c cf) Reconcile(ctx context.Context) (_ *ctrl.Result, err error) {
 
 		return &ctrl.Result{}, c.Guard(ctx, "Configuring Tunnel on Cloudflare", func() (conditions.ConditionStatus, string, error) {
 			if err := c.attachTunnelToDNSRecord(ctx, c.Workspace(), service); err != nil {
-				return "", "", fmt.Errorf("E#TODO: Could not attach tunnel to the DNS record -- %w", err)
+				return "", "", fmt.Errorf("E#3008: Could not attach tunnel to the DNS record -- %w", err)
 			}
 
 			c.Eventf(core.EventTypeNormal, "Tunneling", "Tunnel now pointing to service (%s)", service.Name)
@@ -191,8 +187,8 @@ func (c cf) Terminate(ctx context.Context) (_ *ctrl.Result, err error) {
 	return nil, c.Guard(ctx, "Deleting tunnel on Cloudflare", func() (status conditions.ConditionStatus, reason string, err error) {
 		err = c.api.DeleteTunnel(ctx, cloudflare.AccountIdentifier(c.accountID), providerMeta[kCloudflareTunnelIDKey])
 		if err != nil {
-			logger.Error(err, "E#TODO: Could not delete the Tunnel", "ID", providerMeta[kCloudflareTunnelIDKey])
-			c.Eventf(core.EventTypeWarning, string(c.Condition().Type), "E#TODO: Could not delete the Tunnel (ID: %s) -- %s", providerMeta[kCloudflareTunnelIDKey], err.Error())
+			logger.Error(err, "E#3009: Could not delete the Tunnel", "ID", providerMeta[kCloudflareTunnelIDKey])
+			c.Eventf(core.EventTypeWarning, string(c.Condition().Type), "E#3009: Could not delete the Tunnel (ID: %s) -- %s", providerMeta[kCloudflareTunnelIDKey], err.Error())
 			return "", "", err
 		}
 
@@ -246,12 +242,12 @@ func (c cf) createTunnel(ctx context.Context, workspace *sequencer.Workspace) (t
 	})
 
 	if err != nil {
-		return "", nil, fmt.Errorf("E#TODO: Tunnel creation error -- %w", err)
+		return "", nil, fmt.Errorf("E#3010: Tunnel creation error -- %w", err)
 	}
 
 	token, err = c.api.GetTunnelToken(ctx, cloudflare.AccountIdentifier(c.accountID), tunnel.ID)
 	if err != nil {
-		return "", nil, fmt.Errorf("E#TODO: Tunnel created, token retrieval error -- %w", err)
+		return "", nil, fmt.Errorf("E#3010: Tunnel created, token retrieval error -- %w", err)
 	}
 
 	return token, &tunnel, nil

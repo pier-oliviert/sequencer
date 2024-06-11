@@ -24,12 +24,12 @@ func ReadKeyValueFromDir(ctx context.Context, path string) (collection []KeyValu
 
 	for _, e := range entries {
 		if e.IsDir() {
-			return nil, fmt.Errorf("E#TODO: unexpected directory in path, only text files should be present")
+			return nil, fmt.Errorf("E#1014: unexpected directory in path, only text files should be present")
 		}
 
 		data, err := os.ReadFile(filepath.Join(path, e.Name()))
 		if err != nil {
-			return nil, fmt.Errorf("E#TODO: error while reading the content of the file (%s) -> %w", filepath.Join(path, e.Name()), err)
+			return nil, fmt.Errorf("E#1014: error while reading the content of the file (%s) -> %w", filepath.Join(path, e.Name()), err)
 		}
 
 		collection = append(collection, KeyValue{

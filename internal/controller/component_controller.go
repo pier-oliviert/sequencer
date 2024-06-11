@@ -29,7 +29,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -54,15 +53,13 @@ type ComponentReconciler struct {
 //+kubebuilder:rbac:groups="",resources=services;pods,verbs=get;watch;list;create;delete
 
 func (r *ComponentReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	logger := log.FromContext(ctx)
 	var component sequencer.Component
 
 	if err := r.Client.Get(ctx, req.NamespacedName, &component); err != nil {
 		if k8sErrors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
-		logger.Error(err, "Couldn't retrieve the component", "NamespacedName", req.NamespacedName)
-		return ctrl.Result{}, err
+		return ctrl.Result{}, fmt.Errorf("E#5001: Couldn't retrieve the build (%s) -- %w", req.NamespacedName, err)
 	}
 
 	if component.Status.Phase == "" {

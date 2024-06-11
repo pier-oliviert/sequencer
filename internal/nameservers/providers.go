@@ -14,7 +14,7 @@ func NewProvider(ctx context.Context, controller integrations.ProviderController
 		return newCloudflareProvider(ctx, controller)
 	}
 
-	return nil, errors.New("E#TODO: The DNS spec doesn't include a valid provider")
+	return nil, errors.New("E#3003: The DNS spec doesn't include a valid provider")
 }
 
 func IncludesDNSSpec(spec workspaces.NetworkingSpec) bool {

@@ -108,7 +108,7 @@ func (r *BuildReconciler) launchBuild(ctx context.Context, component *sequencer.
 func (r *BuildReconciler) monitorBuild(ctx context.Context, component *sequencer.Component) (*ctrl.Result, error) {
 	// Expecting only 1 build ref at this point
 	if len(component.Status.BuildRefs) != 1 {
-		return &ctrl.Result{}, fmt.Errorf("expected only 1 build reference for found %d", len(component.Status.BuildRefs))
+		return &ctrl.Result{}, fmt.Errorf("E#1010: Expected only 1 build reference, found %d", len(component.Status.BuildRefs))
 	}
 
 	// Reaching here means there's a Build resource already dispatched and we're monitoring the state of the build
@@ -120,9 +120,7 @@ func (r *BuildReconciler) monitorBuild(ctx context.Context, component *sequencer
 			Reason: err.Error(),
 		})
 
-		if err := r.Client.Status().Update(ctx, component); err != nil {
-			return &ctrl.Result{}, err
-		}
+		return &ctrl.Result{}, r.Client.Status().Update(ctx, component)
 	}
 
 	switch build.Status.Phase {
@@ -146,7 +144,7 @@ func (r *BuildReconciler) monitorBuild(ctx context.Context, component *sequencer
 			return nil, err
 		}
 
-		return nil, fmt.Errorf("E#TODO: Build (%s) had an error, logs are attached to the build", build.Name)
+		return nil, fmt.Errorf("E#1011: Build (%s) had an error, logs are attached to the build", build.Name)
 	}
 
 	return &ctrl.Result{}, nil

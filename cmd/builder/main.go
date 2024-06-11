@@ -98,7 +98,7 @@ func main() {
 
 			_, err = source.Git(ctx, opts...)
 			if err != nil {
-				return fmt.Errorf("E#TODO: Could not pull repository(URL: %s) -- %w", git.URL, err)
+				return fmt.Errorf("E#1012: Could not pull repository(URL: %s) -- %w", git.URL, err)
 			}
 		}
 
