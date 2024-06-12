@@ -87,6 +87,10 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 		Reason: "Locked to create resources",
 	})
 
+	if err := i.Status().Update(ctx, workspace); err != nil {
+		return nil, err
+	}
+
 	ingress := networking.Ingress{
 		ObjectMeta: meta.ObjectMeta{
 			OwnerReferences: []meta.OwnerReference{

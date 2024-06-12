@@ -26,7 +26,7 @@ func (r *DNSReconciler) Reconcile(ctx context.Context, workspace *sequencer.Work
 	spec := workspace.Spec.Networking
 	condition := conditions.FindStatusCondition(workspace.Status.Conditions, workspaces.DNSCondition)
 	if condition == nil {
-		// If the spec doesn't include a Tunnel spec, let's skip this task.
+		// If the spec doesn't include a DNS spec, let's skip this task.
 		if !nameservers.IncludesDNSSpec(spec) {
 			return nil, nil
 		}

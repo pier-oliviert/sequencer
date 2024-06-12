@@ -63,6 +63,10 @@ Workspace errors are top level errors that aren't specific to any of the underly
 |3011|*The DNS Spec doesn't include a valid provider*|The DNS Spec included in the workspace spec does not use a valid provider. The list of provider is available in the [documentation](../docs/specs/workspace.md#networking)|
 |3012|*The Tunnel Spec doesn't include a valid provider*|The Tunnel Spec included in the workspace spec does not use a valid provider. The list of provider is available in the [documentation](../docs/specs/workspace.md#networking)|
 
+## Integration Errors
+|4001|*AWS Config error*|There was an error initializing the AWS client. An error might be attached to provide more information about this error|
+|4002|*Could not get info on Load Balancers*|There was an error fetching information for load balancer, the error attached might provide more information|
+
 
 
 ## System Errors
