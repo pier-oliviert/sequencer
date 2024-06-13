@@ -51,6 +51,7 @@ type WorkspaceReconciler struct {
 //+kubebuilder:rbac:groups=se.quencer.io,resources=workspaces/conditions,verbs=get;update;patch
 //+kubebuilder:rbac:groups=se.quencer.io,resources=workspaces/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=events,verbs=create;patch
+//+kubebuilder:rbac:groups="networking.k8s.io",resources=ingresses,verbs=get;watch;list;create;delete
 
 func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var workspace sequencer.Workspace
@@ -95,20 +96,20 @@ func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return *result, nil
 	}
 
-	if result, err := (&tasks.RulesReconciler{
-		Client:        r.Client,
-		EventRecorder: r.EventRecorder,
-	}).Reconcile(ctx, &workspace); err != nil {
-		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("Rules->%w", err))
-	} else if result != nil {
-		return *result, nil
-	}
-
 	if result, err := (&tasks.ComponentsReconciler{
 		Client:        r.Client,
 		EventRecorder: r.EventRecorder,
 	}).Reconcile(ctx, &workspace); err != nil {
 		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("Components->%w", err))
+	} else if result != nil {
+		return *result, nil
+	}
+
+	if result, err := (&tasks.IngressReconciler{
+		Client:        r.Client,
+		EventRecorder: r.EventRecorder,
+	}).Reconcile(ctx, &workspace); err != nil {
+		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("Ingress->%w", err))
 	} else if result != nil {
 		return *result, nil
 	}

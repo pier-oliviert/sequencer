@@ -15,12 +15,20 @@ spec:
         name: cloudflare-api-token
         key: apiKey
       dns:
-        zoneName: $(YOUR_ACCOUNT_ID)
+        zoneName: $(YOUR_ZONE_NAME)
         zoneId: $(YOUR_ZONE_ID)
       tunnel:
         connector: cloudflared
         accountId: $(YOUR_ACCOUNT_ID)
         route:
+          component: click-mania
+          network: http
+    ingress:
+      className: nginx
+      rules:
+        - name: test
+          subdomain: mysubyo
+          path: /subpath
           component: click-mania
           network: http
   components:

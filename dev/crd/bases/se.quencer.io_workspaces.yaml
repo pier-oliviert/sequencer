@@ -4437,27 +4437,32 @@ spec:
                     required:
                     - secretKeyRef
                     type: object
-                  rules:
-                    items:
-                      properties:
-                        component:
-                          type: string
-                        name:
-                          type: string
-                        network:
-                          type: string
-                        paths:
-                          items:
-                            type: string
-                          type: array
-                        subdomains:
-                          items:
-                            type: string
-                          type: array
-                      required:
-                      - name
-                      type: object
-                    type: array
+                  ingress:
+                    properties:
+                      className:
+                        default: nginx
+                        type: string
+                      rules:
+                        items:
+                          properties:
+                            component:
+                              type: string
+                            name:
+                              type: string
+                            network:
+                              type: string
+                            path:
+                              pattern: ^/.*$
+                              type: string
+                            subdomain:
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                    required:
+                    - rules
+                    type: object
                 type: object
             required:
             - components

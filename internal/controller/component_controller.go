@@ -189,5 +189,5 @@ func (r *ComponentReconciler) componentFailed(ctx context.Context, result ctrl.R
 
 	r.EventRecorder.Event(component, core.EventTypeWarning, string(components.PhaseError), err.Error())
 	component.Status.Phase = components.PhaseError
-	return result, r.Client.Status().Update(ctx, component)
+	return result, r.Status().Update(ctx, component)
 }

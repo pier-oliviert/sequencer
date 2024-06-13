@@ -40,7 +40,7 @@ func (r *DNSReconciler) Reconcile(ctx context.Context, workspace *sequencer.Work
 			Reason: "Workspace requires DNS",
 		})
 
-		return &ctrl.Result{}, r.Client.Status().Update(ctx, workspace)
+		return &ctrl.Result{}, r.Status().Update(ctx, workspace)
 	}
 
 	// Find the tunnel provider
