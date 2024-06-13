@@ -11,6 +11,7 @@ const (
 
 const (
 	DNSCondition       conditions.ConditionType = "DNS"
+	IngressCondition   conditions.ConditionType = "Ingress"
 	TunnelingCondition conditions.ConditionType = "Tunneling"
 	ComponentCondition conditions.ConditionType = "Components"
 )

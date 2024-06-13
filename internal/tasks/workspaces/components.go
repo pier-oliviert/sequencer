@@ -71,8 +71,6 @@ func (r *ComponentsReconciler) ReconcileComponentHealth(ctx context.Context, wor
 		workspace.Status.Phase = workspaces.PhaseHealthy
 
 		r.Event(workspace, core.EventTypeNormal, "Components", "All components are healthy")
-		workspace.Status = *workspace.Status.DeepCopy()
-
 		return &ctrl.Result{}, r.Status().Update(ctx, workspace)
 	}
 
