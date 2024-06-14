@@ -179,7 +179,7 @@ func (i *IngressReconciler) findServices(ctx context.Context, workspace *sequenc
 
 	selector, err := labels.Parse(fmt.Sprintf("%s=%s", workspaces.InstanceLabel, workspace.Name))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("E#3001: Failed to parse the label selector -- %w", err)
 	}
 
 	err = i.List(ctx, &list, &client.ListOptions{
@@ -189,7 +189,7 @@ func (i *IngressReconciler) findServices(ctx context.Context, workspace *sequenc
 
 	if err != nil {
 		i.Event(workspace, core.EventTypeWarning, "Fetching Services", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("E#5002: Couldn't retrieve the list of services -- %w", err)
 	}
 
 	for _, ruleSpec := range ruleSpecs {
