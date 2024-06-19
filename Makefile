@@ -61,7 +61,9 @@ vet: ## Run go vet against code.
 	go vet ./...
 
 .PHONY: dev
-dev:
+dev: manifests generate kustomize fmt vet
+	$(KUSTOMIZE) build dev/crd | $(KUBECTL) apply -f -
+	$(KUSTOMIZE) build dev/default | $(KUBECTL) apply -f -
 	docker build -t operator:dev --target operator . && kind load docker-image operator:dev
 
 .PHONY: test
@@ -147,6 +149,7 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	cd dev/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build dev/default | $(KUBECTL) apply -f -
+
 
 .PHONY: undeploy
 undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
