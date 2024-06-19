@@ -13,6 +13,8 @@ networking:
 ```
 <sup>N.B. This is only the `networking` section of the Workspace custom resource definition. A complete [YAML sample is available](../../dev/samples/workspace.yaml) if you're curious as to how it looks like.</sup>
 
+&nbsp;
+
 The AWS works seamlessly with your [EKS cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html). If you're looking at starting an EKS cluster and want to make sure it's configured properly for Sequencer, you can read more about [configuring your EKS cluster here](../managed/eks.md).
 
 |Key|Type|Required|Description|
@@ -21,7 +23,7 @@ The AWS works seamlessly with your [EKS cluster](https://docs.aws.amazon.com/eks
 |`route53`|[Route53](#route53)|✅|Definition of all the information required to manage DNS records in Route 53|
 |`secretRef`|[SecretRef](#credentials)|❌|If your EKS cluster is [configured correctly](../managed/eks.md), this field should not be needed as the operator can retrieve credentials implicitly. However, for testing purposes, it might be useful to manually provide the credentials|
 
-## [SecretRef](../../api/v1alpha1/utils/reference.go)
+## SecretRef <sup>[[Source]](../../api/v1alpha1/utils/reference.go)</sup>
 
 A reference to an existing secret, the SecretRef has the following schema.
 
@@ -40,7 +42,7 @@ The Secret must contains the access key id and the secret access key as specifie
 |`secretAccessKey`|string|The Secret Access Key|
 
 
-## [Route 53](../../api/v1alpha1/providers/aws.go)
+## Route 53 <sup>[[Source]](../../api/v1alpha1/providers/aws.go)</sup>
 
 All the information from AWS needed to dynamically create route in Route53 and point them to a Network Load Balancer(NLB) that is connected to an ingress controller.
 

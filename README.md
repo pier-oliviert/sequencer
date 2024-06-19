@@ -142,10 +142,10 @@ The goal for Sequencer is to deliver a high quality software. You can [read more
 
 ## Supported cloud providers
 
-|Provider Name|Tunneling|Ingress|DNS|
+|Provider Name|DNS|Ingress|Tunneling|
 |:--------|-|-|-|
 |Cloudflare|✅|🤞|✅|
-|AWS|🤞|🏗️|🏗️|
+|AWS|✅|✅|🤞|
 |Google|🤞|🏗️|🏗️|
 
 Supported: ✅ In the work: 🏗️ Maybe: 🤞
