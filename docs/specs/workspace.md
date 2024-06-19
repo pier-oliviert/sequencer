@@ -78,9 +78,10 @@ The `networking` section is where the integration with cloud provider happens. M
 
 Each integration supported has its own page that describes the schema it uses.
 
-|Integration|DNS|Tunneling|
+|Integration|DNS|Ingress|Tunneling|
 |:----|-|-|
-|[`cloudflare`](../providers/cloudflare.md)|✅|✅|
+|[`cloudflare`](../providers/cloudflare.md)|✅|❌|✅|
+|[`aws`](../providers/aws.md)|✅|✅|❌|
 
 ## Components
 This contains a list of components that needs to be deployed as part of a workspace. These components can be your own application, requiring an image to be built, but it can also be already built images available publicly like `mysql`, `postgresql`, `redis`, etc. Each component will manage a single pod running the image. You can see a component as a bespoke [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). It is important to note that it doesn't offer the same guarantees as a Deployment, a Component is not made to run production environments.
