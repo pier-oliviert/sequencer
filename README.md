@@ -131,7 +131,7 @@ This project is still very early on and as such, should be considered a technica
 
 The goal for Sequencer is to deliver a high quality software. You can [read more about the philosophy behind Sequencer](./PHILOSOPHY.md).
 
-# Features
+## Features
 
 - Build image with [Buildkit](https://docs.docker.com/build/buildkit/)
 - Cache images locally with [Distribution](https://github.com/distribution/distribution)
@@ -140,7 +140,7 @@ The goal for Sequencer is to deliver a high quality software. You can [read more
 - Create network routes using integrations (Cloudflare, AWS, Google, etc.)
 - Create unique URL that points to your deployed application
 
-## Supported cloud providers
+### Supported cloud providers
 
 |Provider Name|DNS|Ingress|Tunneling|
 |:--------|-|-|-|
@@ -150,13 +150,20 @@ The goal for Sequencer is to deliver a high quality software. You can [read more
 
 Supported: ✅ In the work: 🏗️ Maybe: 🤞
 
-# Install
+## Install
 
-## Dependencies
+### Dependencies
 
 You will need to have [Cert-Manager](https://cert-manager.io/) running beforehand. The easiest way to install cert-manager is to follow their [installation guide](https://cert-manager.io/docs/installation/).
 
-## Default Helm installation
+If you plan on using a managed Kubernetes cluster, there's documentation on making sure everything is configured to use Sequencer, if documentation is missing for the managed solution you want to use, please [file an issue](https://github.com/pier-oliviert/sequencer/issues).
+
+|Managed Cluster|Link|
+|:--------|-|
+|AWS EKS|[Documentation](docs/managed/eks.md)|
+
+
+### Default Helm installation
 Using [Helm](https://helm.sh/), you can install Sequencer as follows:
 
 ```sh
@@ -169,7 +176,7 @@ helm install sequencer https://github.com/pier-oliviert/sequencer/releases/downl
 
 The best way to understand how Sequencer works is to try it out. The [Get Started guide](./GET_STARTED.md) has all the information you need to get a workspace up and running.
 
-## Reference
+## References
 
 Sequencer has a few custom resources, the main ones are designed to work like [Matryoshka doll](https://en.wikipedia.org/wiki/Matryoshka_doll). The Workspace is the top level resource, which includes N-number of a Components, where each of those components can have at-most one Build. Each of the resource has its own Spec for you to peruse.
 
