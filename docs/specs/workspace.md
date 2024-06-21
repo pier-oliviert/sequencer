@@ -79,7 +79,7 @@ The `networking` section is where the integration with cloud provider happens. M
 Each integration supported has its own page that describes the schema it uses.
 
 |Integration|DNS|Ingress|Tunneling|
-|:----|-|-|
+|:----|-|-|-|
 |[`cloudflare`](../providers/cloudflare.md)|✅|❌|✅|
 |[`aws`](../providers/aws.md)|✅|✅|❌|
 
