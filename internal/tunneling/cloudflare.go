@@ -13,13 +13,14 @@ import (
 	sequencer "se.quencer.io/api/v1alpha1"
 	"se.quencer.io/api/v1alpha1/components"
 	"se.quencer.io/api/v1alpha1/conditions"
-	providers "se.quencer.io/api/v1alpha1/providers"
+	tunneling "se.quencer.io/api/v1alpha1/tunneling"
 	"se.quencer.io/api/v1alpha1/utils"
 	"se.quencer.io/api/v1alpha1/workspaces"
 	"se.quencer.io/internal/integrations"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/external-dns/endpoint"
 )
 
 const kCloudflareTunnelFinalizer = "tunnel.se.quencer.io/cloudflare"
@@ -39,7 +40,7 @@ type cf struct {
 }
 
 func newCloudflareProvider(ctx context.Context, controller integrations.ProviderController) (integrations.Provider, error) {
-	spec := controller.Workspace().Spec.Networking.Cloudflare
+	spec := controller.Workspace().Spec.Networking.Tunnel.Cloudflare
 
 	var secret core.Secret
 	namespacedName := types.NamespacedName{
@@ -68,14 +69,14 @@ func newCloudflareProvider(ctx context.Context, controller integrations.Provider
 
 	return &cf{
 		api:                api,
-		accountID:          spec.Tunnel.AccountID,
+		accountID:          spec.AccountID,
 		ProviderController: controller,
 	}, nil
 }
 
 func (c cf) Reconcile(ctx context.Context) (_ *ctrl.Result, err error) {
 	status := c.Workspace().Status
-	tunnelSpec := c.Workspace().Spec.Networking.Cloudflare.Tunnel
+	tunnelSpec := c.Workspace().Spec.Networking.Tunnel.Cloudflare
 	condition := c.Condition()
 
 	if err := c.SetFinalizer(ctx, kCloudflareTunnelFinalizer); err != nil {
@@ -115,12 +116,38 @@ func (c cf) Reconcile(ctx context.Context) (_ *ctrl.Result, err error) {
 			return nil, nil
 		}
 
-		if status.DNS == nil {
-			c.Event(core.EventTypeNormal, "Tunneling", "Waiting for DNS to be configured")
-			return nil, nil
-		}
+		return &ctrl.Result{}, c.Guard(ctx, "Configuring DNS with the tunnel", func() (conditions.ConditionStatus, string, error) {
 
-		return &ctrl.Result{}, c.Guard(ctx, "Configuring Tunnel on Cloudflare", func() (conditions.ConditionStatus, string, error) {
+			if c.Workspace().Status.DNS == nil {
+				c.Workspace().Status.DNS = &workspaces.DNS{}
+			}
+
+			c.Workspace().Status.DNS.Hostname = fmt.Sprintf("%s.%s", c.Workspace().Name, c.Workspace().Spec.Networking.DNS.Zone)
+
+			endpoint := &endpoint.DNSEndpoint{
+				ObjectMeta: meta.ObjectMeta{
+					GenerateName: fmt.Sprintf("%s-", c.Workspace().Name),
+					Annotations:  c.Workspace().Spec.Networking.DNS.Annotations,
+				},
+				Spec: endpoint.DNSEndpointSpec{
+					Endpoints: []*endpoint.Endpoint{{
+						DNSName:    c.Workspace().Status.DNS.Hostname,
+						RecordType: "CNAME",
+						Targets: []string{
+							status.Tunnel.Hostname,
+						},
+						ProviderSpecific: endpoint.ProviderSpecific{{
+							Name:  "external-dns.alpha.kubernetes.io/cloudflare-proxied",
+							Value: "true",
+						}},
+					}},
+				},
+			}
+
+			if err := c.Create(ctx, endpoint); err != nil {
+				return "", "", fmt.Errorf("E#3003: Could not create a DNS Endpoint for external-dns: %w", err)
+			}
+
 			if err := c.attachTunnelToDNSRecord(ctx, c.Workspace(), service); err != nil {
 				return "", "", fmt.Errorf("E#3008: Could not attach tunnel to the DNS record -- %w", err)
 			}
@@ -196,7 +223,7 @@ func (c cf) Terminate(ctx context.Context) (_ *ctrl.Result, err error) {
 	})
 }
 
-func (c cf) serviceEndpoint(routeSpec *providers.CloudflareRouteSpec, service *core.Service) string {
+func (c cf) serviceEndpoint(routeSpec *tunneling.CloudflareRouteSpec, service *core.Service) string {
 	protocol := routeSpec.Protocol
 	if protocol == "" {
 		protocol = "http"
@@ -205,7 +232,7 @@ func (c cf) serviceEndpoint(routeSpec *providers.CloudflareRouteSpec, service *c
 	return fmt.Sprintf("%s://%s:%d", protocol, service.Name, service.Spec.Ports[0].Port)
 }
 
-func (cf *cf) getServiceFor(ctx context.Context, workspace *sequencer.Workspace, routeSpec providers.CloudflareRouteSpec) (*core.Service, error) {
+func (cf *cf) getServiceFor(ctx context.Context, workspace *sequencer.Workspace, routeSpec tunneling.CloudflareRouteSpec) (*core.Service, error) {
 	var services core.ServiceList
 	var service *core.Service
 
@@ -254,18 +281,18 @@ func (c cf) createTunnel(ctx context.Context, workspace *sequencer.Workspace) (t
 }
 
 func (c cf) attachTunnelToDNSRecord(ctx context.Context, workspace *sequencer.Workspace, service *core.Service) error {
-	spec := workspace.Spec.Networking.Cloudflare
+	dns := c.Workspace().Status.DNS
+	spec := workspace.Spec.Networking.Tunnel.Cloudflare
 	tunnel := workspace.Status.Tunnel
-	dns := workspace.Status.DNS
-
 	_, err := c.api.UpdateTunnelConfiguration(ctx, cloudflare.AccountIdentifier(c.accountID), cloudflare.TunnelConfigurationParams{
 		TunnelID: tunnel.ProviderMeta[kCloudflareTunnelIDKey],
 		Config: cloudflare.TunnelConfiguration{
-			Ingress: []cloudflare.UnvalidatedIngressRule{{
-				Path:     spec.Tunnel.Route.Path,
-				Hostname: dns.Hostname,
-				Service:  c.serviceEndpoint(&spec.Tunnel.Route, service),
-			},
+			Ingress: []cloudflare.UnvalidatedIngressRule{
+				{
+					Path:     spec.Route.Path,
+					Hostname: dns.Hostname,
+					Service:  c.serviceEndpoint(&spec.Route, service),
+				},
 				{
 					Service: "http_status:404",
 				},

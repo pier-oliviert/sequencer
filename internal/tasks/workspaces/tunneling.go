@@ -44,10 +44,11 @@ func (r *TunnelingReconciler) Reconcile(ctx context.Context, workspace *sequence
 	if condition.Status == conditions.ConditionLocked {
 		return &ctrl.Result{RequeueAfter: 1 * time.Second}, nil
 	}
+
 	// Find the tunnel provider
 	provider, err := tunneling.NewProvider(ctx, integrations.NewController(workspace, *condition, r))
 	if err != nil {
-		return nil, r.reconciliationError(ctx, workspace, err)
+		return nil, err
 	}
 
 	if workspace.Status.Phase == workspaces.PhaseTerminating {
@@ -57,18 +58,4 @@ func (r *TunnelingReconciler) Reconcile(ctx context.Context, workspace *sequence
 
 	// Handing off reconciliation of this condition to the tunnel provider
 	return provider.Reconcile(ctx)
-}
-
-func (r *TunnelingReconciler) reconciliationError(ctx context.Context, workspace *sequencer.Workspace, err error) error {
-	conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
-		Type:   workspaces.TunnelingCondition,
-		Status: conditions.ConditionError,
-		Reason: err.Error(),
-	})
-
-	if updateErr := r.Status().Update(ctx, workspace); updateErr != nil {
-		return updateErr
-	}
-
-	return err
 }

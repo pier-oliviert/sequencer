@@ -22,6 +22,6 @@ type RuleSpec struct {
 
 	// +kubebuilder:validation:Pattern=`^/.*$`
 	Path          *string `json:"path,omitempty"`
-	ComponentName string  `json:"component,omitempty"`
-	NetworkName   string  `json:"network,omitempty"`
+	ComponentName string  `json:"component"`
+	NetworkName   string  `json:"network"`
 }

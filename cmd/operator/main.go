@@ -28,6 +28,7 @@ import (
 	"k8s.io/utils/env"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,7 +39,11 @@ import (
 
 	sequencer "se.quencer.io/api/v1alpha1"
 	"se.quencer.io/internal/controller"
+
 	//+kubebuilder:scaffold:imports
+
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/external-dns/endpoint"
 )
 
 var (
@@ -50,6 +55,17 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(sequencer.AddToScheme(scheme))
+
+	// Need to register external-dns as a scheme here to use it
+	eDNSGroupVersion := schema.GroupVersion{
+		Group:   "externaldns.k8s.io",
+		Version: "v1alpha1",
+	}
+	scheme.AddKnownTypes(eDNSGroupVersion,
+		&endpoint.DNSEndpoint{},
+		&endpoint.DNSEndpointList{},
+	)
+	meta.AddToGroupVersion(scheme, eDNSGroupVersion)
 	//+kubebuilder:scaffold:scheme
 }
 

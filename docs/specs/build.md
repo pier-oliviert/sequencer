@@ -62,8 +62,8 @@ You can configure Buildkit to build the image using top-level fields in the Buil
 |`context`|string|❌|Defaults to `.`, if you need to use a different value, you can set it here. This is useful when using multiple import content that points to different paths|
 |`dockerfile`|string|❌|Defaults to `Dockerfile`, you can specify where the Dockerfile is located. Can be set with a relative path, eg. `source/docker/Dockerfile.dev`|
 |`target`|string|❌|If the Dockerfile is configured to use multi stage builds, you can specify which you target with this field|
-|`args`|[DynamicValues](#dynamicvalues)|❌|Key/Value to be passed as [build arguments](https://docs.docker.com/build/guide/build-args/). The key specified will be passed as-is as a key for the build argument|
-|`secrets`|[DynamicValues](#dynamicvalues)|❌|Key/Value to be mounted as [build secrets](https://docs.docker.com/build/building/secrets/). The ID of the secret will match they name of the key specified.|
+|`args`|[DynamicValues](#dynamicvalues-source)|❌|Key/Value to be passed as [build arguments](https://docs.docker.com/build/guide/build-args/). The key specified will be passed as-is as a key for the build argument|
+|`secrets`|[DynamicValues](#dynamicvalues-source)|❌|Key/Value to be mounted as [build secrets](https://docs.docker.com/build/building/secrets/). The ID of the secret will match they name of the key specified.|
 
 &nbsp;
 
@@ -88,8 +88,8 @@ If you'd like to have another source control supported, please file an issue.
 |Key|Type|Required|Description|
 |:----|-|-|-|
 |`path`|string|❌|Relative path where the source code should be checked out to|
-|`contentFrom`|[ImportSource](#importsourcegit)|✅|The type of version control to use (git)|
-|`credentials`|[Credentials](#credentials)|❌|Credentials to checkout the code. You can leave it out for a public repository. Required for a private repo. The secret needs to be a *private key*|
+|`contentFrom`|[ImportSource](#importsourcegit-source)|✅|The type of version control to use (git)|
+|`credentials`|[Credentials](#credentials-source)|❌|Credentials to checkout the code. You can leave it out for a public repository. Required for a private repo. The secret needs to be a *private key*|
 
 ### `ImportSource.Git` <sup>[[Source]](../../api/v1alpha1/builds/import_content.go)</sup>
 |Key|Type|Required|Description|
@@ -107,7 +107,7 @@ Section that describes all the container registries you want to export the image
 |:----|-|-|-|
 |`url`|string|✅|URL for the container registry repository, the registry needs to support the credential auth scheme provided.|
 |`tags`|[]string|✅|List of tags for the image|
-|`credentials`|[Credentials](#credentials)|✅|Credentials to authenticate with the container registry|
+|`credentials`|[Credentials](#credentials-source)|✅|Credentials to authenticate with the container registry|
 
 &nbsp;
 
@@ -118,7 +118,7 @@ These objects are embedded in one of the fields described above.
 |Key|Type|Required|Description|
 |:----|-|-|-|
 |`authScheme`|string|✅|The type of authentication scheme this credential represents. Can be one of `token`, `keyPair`|
-|`secretRef`|[LocalObjectReference](#localobjectreference)|✅|The reference to a secret that is bound to the same namespace as the operator|
+|`secretRef`|[LocalObjectReference](#localobjectreference-source)|✅|The reference to a secret that is bound to the same namespace as the operator|
 
 A `token` scheme means that the authentication only requires a single secret token that will be passed to the provider. When this scheme is used, the underlying secret is **required** to have the key `privateKey` set in its data.
 
@@ -134,16 +134,16 @@ User provided values stored in either a ConfigMap or a Secret.
 
 |Key|Type|Required|Description|
 |:----|-|-|-|
-|`valuesFrom`|[SourceRef](#sourceref)|✅|Reference to checkout, it can be a SHA or a tag, eg. `main`|
-|`items`|[[]KeyToPath](#keytopath)|✅|List of keys to be passed to the build|
+|`valuesFrom`|[SourceRef](#sourceref-source)|✅|Reference to checkout, it can be a SHA or a tag, eg. `main`|
+|`items`|[[]KeyToPath](#keytopath-source)|✅|List of keys to be passed to the build|
 
 #### `SourceRef` <sup>[[Source]](../../api/v1alpha1/builds/config/dynamic_values.go)</sup>
 Exactly one of the reference needs to be specified.
 
 |Key|Type|Required|Description|
 |:----|-|-|-|
-|`configMapRef`|[LocalObjectReference](#localobjectreference)|❌|Reference to an existing ConfigMap, in the same namespace|
-|`secretRef`|[LocalObjectReference](#localobjectreference)|❌|Reference to an existing Secret, in the same namespace|
+|`configMapRef`|[LocalObjectReference](#localobjectreference-source)|❌|Reference to an existing ConfigMap, in the same namespace|
+|`secretRef`|[LocalObjectReference](#localobjectreference-source)|❌|Reference to an existing Secret, in the same namespace|
 
 #### `KeyToPath` <sup>[[Source]](../../api/v1alpha1/builds/config/dynamic_values.go)</sup>
 |Key|Type|Required|Description|

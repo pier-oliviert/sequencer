@@ -34,6 +34,15 @@ rules:
   - list
   - watch
 - apiGroups:
+  - externaldns.k8s.io
+  resources:
+  - dnsendpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+- apiGroups:
   - networking.k8s.io
   resources:
   - ingresses

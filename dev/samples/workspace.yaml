@@ -6,31 +6,23 @@ metadata:
     app.kubernetes.io/instance: workspace-sample
     app.kubernetes.io/managed-by: sequencer
     app.kubernetes.io/created-by: sequencer
-  generateName: workspace-sample-
+  generateName: ws-
   namespace: sequencer-system
 spec:
   networking:
-    cloudflare:
-      secretKeyRef:
-        name: cloudflare-api-token
-        key: apiKey
-      dns:
-        zoneName: $(YOUR_ZONE_NAME)
-        zoneId: $(YOUR_ZONE_ID)
-      tunnel:
+    dns:
+      zone: pier-olivier.dev
+    tunnel:
+      cloudflare:
         connector: cloudflared
         accountId: $(YOUR_ACCOUNT_ID)
         route:
           component: click-mania
           network: http
-    ingress:
-      className: nginx
-      rules:
-        - name: test
-          subdomain: mysubyo
-          path: /subpath
-          component: click-mania
-          network: http
+        secretKeyRef:
+            namespace: default
+            name: cloudflare-api-token
+            key: apiKey
   components:
     - name: redis
       networks:

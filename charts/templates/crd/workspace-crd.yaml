@@ -4388,86 +4388,16 @@ spec:
                 type: array
               networking:
                 properties:
-                  aws:
+                  dns:
                     properties:
-                      region:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      zone:
                         type: string
-                      route53:
-                        properties:
-                          hostedZoneId:
-                            type: string
-                          hostedZoneName:
-                            type: string
-                          loadBalancerArn:
-                            type: string
-                        required:
-                        - hostedZoneId
-                        - hostedZoneName
-                        - loadBalancerArn
-                        type: object
-                      secretRef:
-                        properties:
-                          name:
-                            type: string
-                          namespace:
-                            type: string
-                        required:
-                        - name
-                        type: object
                     required:
-                    - region
-                    type: object
-                  cloudflare:
-                    properties:
-                      dns:
-                        properties:
-                          zoneId:
-                            type: string
-                          zoneName:
-                            type: string
-                        required:
-                        - zoneId
-                        - zoneName
-                        type: object
-                      secretKeyRef:
-                        properties:
-                          key:
-                            type: string
-                          name:
-                            type: string
-                          namespace:
-                            type: string
-                        required:
-                        - key
-                        - name
-                        type: object
-                      tunnel:
-                        properties:
-                          accountId:
-                            type: string
-                          connector:
-                            type: string
-                          route:
-                            properties:
-                              component:
-                                type: string
-                              network:
-                                type: string
-                              path:
-                                type: string
-                              protocol:
-                                type: string
-                            required:
-                            - component
-                            - network
-                            type: object
-                        required:
-                        - accountId
-                        - connector
-                        - route
-                        type: object
-                    required:
-                    - secretKeyRef
+                    - zone
                     type: object
                   ingress:
                     properties:
@@ -4489,12 +4419,57 @@ spec:
                             subdomain:
                               type: string
                           required:
+                          - component
                           - name
+                          - network
                           type: object
                         type: array
                     required:
                     - rules
                     type: object
+                  tunnel:
+                    properties:
+                      cloudflare:
+                        properties:
+                          accountId:
+                            type: string
+                          connector:
+                            type: string
+                          route:
+                            properties:
+                              component:
+                                type: string
+                              network:
+                                type: string
+                              path:
+                                type: string
+                              protocol:
+                                type: string
+                            required:
+                            - component
+                            - network
+                            type: object
+                          secretKeyRef:
+                            properties:
+                              key:
+                                type: string
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            required:
+                            - key
+                            - name
+                            type: object
+                        required:
+                        - accountId
+                        - connector
+                        - route
+                        - secretKeyRef
+                        type: object
+                    type: object
+                required:
+                - dns
                 type: object
             required:
             - components
@@ -4549,12 +4524,8 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                  provider:
-                    type: string
                 required:
                 - hostname
-                - meta
-                - provider
                 type: object
               phase:
                 enum:

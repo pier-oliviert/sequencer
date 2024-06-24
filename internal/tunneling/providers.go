@@ -9,7 +9,7 @@ import (
 )
 
 func NewProvider(ctx context.Context, controller integrations.ProviderController) (integrations.Provider, error) {
-	spec := controller.Workspace().Spec.Networking
+	spec := controller.Workspace().Spec.Networking.Tunnel
 	if spec.Cloudflare != nil {
 		return newCloudflareProvider(ctx, controller)
 	}
@@ -18,7 +18,11 @@ func NewProvider(ctx context.Context, controller integrations.ProviderController
 }
 
 func IncludesTunnelSpec(spec workspaces.NetworkingSpec) bool {
-	if spec.Cloudflare != nil && spec.Cloudflare.Tunnel != nil {
+	if spec.Tunnel == nil {
+		return false
+	}
+
+	if spec.Tunnel.Cloudflare != nil {
 		return true
 	}
 

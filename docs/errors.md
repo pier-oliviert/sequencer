@@ -53,9 +53,8 @@ Workspace errors are top level errors that aren't specific to any of the underly
 |:----|-|-|
 |3001|*Failed to parse the label selector*|An error with label selector should not be caused by a user, if this happens to you, please file an [issue](https://github.com/pier-oliviert/sequencer/issues)|
 |3002|*Could not create the component*|The workspace tried to create the Component custom resource with the spec provided in the Workspace's spec, but an error occured. This might be an [issue](https://github.com/pier-oliviert/sequencer/issues)|
+|3003|*Could not create a DNS record with external-dns*|There was an error creating an external-dns custom resource. The error attached might give you more information|
 |3004|*Secret doesn't have a value for the specified key*|The secret referenced doesn't include a value for the key given. The error message should include both the secret's name and the key that it was looking for|
-|3005|*Could not create a DNS Record*|The DNS Record could not be created for the integration specified in the error message|
-|3006|*Could not delete a DNS Record*|The DNS Record could not be deleted for the integration specified in the error message|
 |3007|*Could not create an integration client*|There was an error initializing the integration client|
 |3008|*Could not update tunnel with DNS record information*|An error prevented the tunnel to be configured to point to the DNS record|
 |3009|*Could not delete the tunnel*|The tunnel could not be deleted from the integration. It may be orphaned on the integration's side|
@@ -64,9 +63,6 @@ Workspace errors are top level errors that aren't specific to any of the underly
 |3012|*The Tunnel Spec doesn't include a valid provider*|The Tunnel Spec included in the workspace spec does not use a valid provider. The list of provider is available in the [documentation](../docs/specs/workspace.md#networking)|
 
 ## Integration Errors
-|4001|*AWS Config error*|There was an error initializing the AWS client. An error might be attached to provide more information about this error|
-|4002|*Could not get info on Load Balancers*|There was an error fetching information for load balancer, the error attached might provide more information|
-
 
 
 ## System Errors
