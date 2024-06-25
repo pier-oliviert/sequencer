@@ -17,19 +17,19 @@ metadata:
   namespace: sequencer-system
 spec:
   networking:
-    cloudflare:
-      secretKeyRef:
-        name: cloudflare-api-token
-        key: apiKey
-      dns:
-        zoneName: $(YOUR_ACCOUNT_ID)
-        zoneId: $(YOUR_ZONE_ID)
-      tunnel:
+    dns:
+      zone: yourdomain.com
+    tunnel:
+      cloudflare:
         connector: cloudflared
         accountId: $(YOUR_ACCOUNT_ID)
         route:
-          component: myapp
+          component: click-mania
           network: http
+        secretKeyRef:
+            namespace: default
+            name: cloudflare-api-token
+            key: apiKey
   components:
     - name: redis
       networks:
@@ -155,6 +155,8 @@ Supported: ✅ In the work: 🏗️ Maybe: 🤞
 ### Dependencies
 
 You will need to have [Cert-Manager](https://cert-manager.io/) running beforehand. The easiest way to install cert-manager is to follow their [installation guide](https://cert-manager.io/docs/installation/).
+
+You will also need to have [external-dns](https://github.com/kubernetes-sigs/external-dns) running. Their [documentation](https://kubernetes-sigs.github.io/external-dns/) also cover how to install it.
 
 If you plan on using a managed Kubernetes cluster, there's documentation on making sure everything is configured to use Sequencer, if documentation is missing for the managed solution you want to use, please [file an issue](https://github.com/pier-oliviert/sequencer/issues).
 

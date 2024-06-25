@@ -35,19 +35,18 @@ metadata:
   namespace: sequencer-system
 spec:
   networking:
-    cloudflare:
-      secretKeyRef:
-        name: cloudflare-api-token # Change this to your value if it's different
-        key: apiKey # Change this to your value if it's different
-      dns:
-        zoneName: yourdomain.com # Change this to your value if it's different
-        zoneId: abcd1234 # Change this to your value if it's different
-      tunnel:
+    dns:
+      zone: yourdomain.com # Change this to your value if it's different
+    tunnel:
+      cloudflare:
         connector: cloudflared
         accountId: abcd123455abcd # Change this to your value if it's different
         route:
           component: click-mania
           network: http
+        secretKeyRef:
+          name: cloudflare-api-token # Change this to your value if it's different
+          key: apiKey # Change this to your value if it's different
   components:
     - name: redis
       networks:
