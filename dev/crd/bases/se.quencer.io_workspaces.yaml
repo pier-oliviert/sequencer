@@ -4387,10 +4387,6 @@ spec:
                 properties:
                   dns:
                     properties:
-                      annotations:
-                        additionalProperties:
-                          type: string
-                        type: object
                       zone:
                         type: string
                     required:
@@ -4517,10 +4513,25 @@ spec:
                 properties:
                   hostname:
                     type: string
-                  meta:
-                    additionalProperties:
-                      type: string
-                    type: object
+                  records:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        properties:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        target:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - name
+                      - target
+                      - type
+                      type: object
+                    type: array
                 required:
                 - hostname
                 type: object

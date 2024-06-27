@@ -28,11 +28,16 @@ type Tunnel struct {
 type DNS struct {
 	Hostname string `json:"hostname"`
 
-	// Any key/value pair that needs to be used by the provider
-	// These values are going to be stored as-is and won't be secret.
-	// If a secret value needs to be provided, a secret can be created by
-	// the provider and the reference to the secret can be added to this field.
-	ProviderMeta map[string]string `json:"meta,omitempty"`
+	Records []DNSRecord `json:"records,omitempty"`
+}
+
+// +kubebuilder:object:generate=true
+type DNSRecord struct {
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	Target string `json:"target"`
+
+	Properties map[string]string `json:"properties,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=Deploying;Healthy;Error;Terminating

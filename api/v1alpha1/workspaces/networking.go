@@ -34,6 +34,4 @@ type TunnelSpec struct {
 // +kubebuilder:object:generate=true
 type DNSSpec struct {
 	Zone string `json:"zone"`
-
-	Annotations map[string]string `json:"annotations,omitempty"`
 }

@@ -52,7 +52,7 @@ type WorkspaceReconciler struct {
 //+kubebuilder:rbac:groups=se.quencer.io,resources=workspaces/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 //+kubebuilder:rbac:groups="networking.k8s.io",resources=ingresses,verbs=get;watch;list;create;delete
-//+kubebuilder:rbac:groups="externaldns.k8s.io",resources=dnsendpoints,verbs=get;list;create;delete
+//+kubebuilder:rbac:groups="externaldns.k8s.io",resources=dnsendpoints,verbs=watch;get;list;create;delete
 
 func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var workspace sequencer.Workspace
@@ -77,6 +77,15 @@ func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if workspace.Status.Phase == workspaces.PhaseError {
 		return ctrl.Result{}, nil
+	}
+
+	if result, err := (&tasks.DNSReconciler{
+		Client:        r.Client,
+		EventRecorder: r.EventRecorder,
+	}).Reconcile(ctx, &workspace); err != nil {
+		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("DNS->%w", err))
+	} else if result != nil {
+		return *result, nil
 	}
 
 	if result, err := (&tasks.TunnelingReconciler{

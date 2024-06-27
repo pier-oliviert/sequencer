@@ -42,6 +42,7 @@ rules:
   - delete
   - get
   - list
+  - watch
 - apiGroups:
   - networking.k8s.io
   resources:

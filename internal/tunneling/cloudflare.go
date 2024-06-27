@@ -20,7 +20,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/external-dns/endpoint"
 )
 
 const kCloudflareTunnelFinalizer = "tunnel.se.quencer.io/cloudflare"
@@ -118,35 +117,15 @@ func (c cf) Reconcile(ctx context.Context) (_ *ctrl.Result, err error) {
 
 		return &ctrl.Result{}, c.Guard(ctx, "Configuring DNS with the tunnel", func() (conditions.ConditionStatus, string, error) {
 
-			if c.Workspace().Status.DNS == nil {
-				c.Workspace().Status.DNS = &workspaces.DNS{}
-			}
-
-			c.Workspace().Status.DNS.Hostname = fmt.Sprintf("%s.%s", c.Workspace().Name, c.Workspace().Spec.Networking.DNS.Zone)
-
-			endpoint := &endpoint.DNSEndpoint{
-				ObjectMeta: meta.ObjectMeta{
-					GenerateName: fmt.Sprintf("%s-", c.Workspace().Name),
-					Annotations:  c.Workspace().Spec.Networking.DNS.Annotations,
+			dns := c.Workspace().Status.DNS
+			dns.Records = append(dns.Records, workspaces.DNSRecord{
+				Name:   c.Workspace().Status.DNS.Hostname,
+				Type:   "CNAME",
+				Target: status.Tunnel.Hostname,
+				Properties: map[string]string{
+					"external-dns.alpha.kubernetes.io/cloudflare-proxied": "true",
 				},
-				Spec: endpoint.DNSEndpointSpec{
-					Endpoints: []*endpoint.Endpoint{{
-						DNSName:    c.Workspace().Status.DNS.Hostname,
-						RecordType: "CNAME",
-						Targets: []string{
-							status.Tunnel.Hostname,
-						},
-						ProviderSpecific: endpoint.ProviderSpecific{{
-							Name:  "external-dns.alpha.kubernetes.io/cloudflare-proxied",
-							Value: "true",
-						}},
-					}},
-				},
-			}
-
-			if err := c.Create(ctx, endpoint); err != nil {
-				return "", "", fmt.Errorf("E#3003: Could not create a DNS Endpoint for external-dns: %w", err)
-			}
+			})
 
 			if err := c.attachTunnelToDNSRecord(ctx, c.Workspace(), service); err != nil {
 				return "", "", fmt.Errorf("E#3008: Could not attach tunnel to the DNS record -- %w", err)
