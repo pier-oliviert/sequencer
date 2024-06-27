@@ -29,9 +29,7 @@ controllerManager:
       capabilities:
         drop:
         - ALL
-    image:
-      repository: pothibo/sequencer-operator
-      tag: 0.1
+    image: pothibo/sequencer-operator:0.1
     resources:
       limits:
         cpu: 500m

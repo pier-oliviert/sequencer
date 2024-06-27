@@ -47,8 +47,7 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ include "operator.fullname" . }}-controller-manager
-        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
-          | default .Chart.AppVersion }}
+        image: {{ quote .Values.controllerManager.manager.image }}
         livenessProbe:
           httpGet:
             path: /healthz
