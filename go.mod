@@ -1,4 +1,4 @@
-module se.quencer.io
+module github.com/pier-oliviert/sequencer
 
 go 1.22.2
 

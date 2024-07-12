@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 
 	gcr "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/utils"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"se.quencer.io/api/v1alpha1/conditions"
-	"se.quencer.io/api/v1alpha1/utils"
 )
 
 // +kubebuilder:object:generate=true

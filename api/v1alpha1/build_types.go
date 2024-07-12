@@ -17,10 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	builds "github.com/pier-oliviert/sequencer/api/v1alpha1/builds"
+	config "github.com/pier-oliviert/sequencer/api/v1alpha1/builds/config"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/utils"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	builds "se.quencer.io/api/v1alpha1/builds"
-	config "se.quencer.io/api/v1alpha1/builds/config"
-	"se.quencer.io/api/v1alpha1/utils"
 )
 
 type BuildSpec struct {

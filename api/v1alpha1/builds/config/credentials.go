@@ -3,8 +3,8 @@ package config
 import (
 	"fmt"
 
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/utils"
 	core "k8s.io/api/core/v1"
-	"se.quencer.io/api/v1alpha1/utils"
 )
 
 type AuthScheme string

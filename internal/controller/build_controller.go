@@ -33,9 +33,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	sequencer "se.quencer.io/api/v1alpha1"
-	builds "se.quencer.io/api/v1alpha1/builds"
-	tasks "se.quencer.io/internal/tasks/builds"
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	builds "github.com/pier-oliviert/sequencer/api/v1alpha1/builds"
+	tasks "github.com/pier-oliviert/sequencer/internal/tasks/builds"
 )
 
 const (

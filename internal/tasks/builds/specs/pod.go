@@ -9,7 +9,7 @@ import (
 
 	"k8s.io/client-go/tools/record"
 
-	sequencer "se.quencer.io/api/v1alpha1"
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 

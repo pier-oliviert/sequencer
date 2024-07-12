@@ -3,10 +3,10 @@ package specs
 import (
 	"errors"
 
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	buildConfig "github.com/pier-oliviert/sequencer/api/v1alpha1/builds/config"
 	core "k8s.io/api/core/v1"
 	"k8s.io/utils/env"
-	sequencer "se.quencer.io/api/v1alpha1"
-	buildConfig "se.quencer.io/api/v1alpha1/builds/config"
 )
 
 const (

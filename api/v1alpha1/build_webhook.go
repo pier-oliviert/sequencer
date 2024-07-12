@@ -3,11 +3,11 @@ package v1alpha1
 import (
 	"errors"
 
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/builds/validators"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"se.quencer.io/api/v1alpha1/builds/validators"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"

@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"se.quencer.io/test/utils"
+	"github.com/pier-oliviert/sequencer/test/utils"
 )
 
 const namespace = "sequencer-system"

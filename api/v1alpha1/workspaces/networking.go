@@ -1,7 +1,7 @@
 package workspaces
 
 import (
-	"se.quencer.io/api/v1alpha1/tunneling"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/tunneling"
 )
 
 // NetworkingSpec is what binds the internal resources (components, builds, etc.) to the

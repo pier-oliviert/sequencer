@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
-	"se.quencer.io/internal/builder/secrets"
+	"github.com/pier-oliviert/sequencer/internal/builder/secrets"
 )
 
 type Keychain map[Domain]Credential

@@ -1,11 +1,11 @@
 package builds
 
 import (
-	"se.quencer.io/api/v1alpha1/conditions"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
 )
 
 const (
-	LabelName string = "se.quencer.io/build"
+	LabelName string = "github.com/pier-oliviert/sequencer/build"
 )
 
 // +kubebuilder:validation:Enum=Initialized;Running;Success;Error

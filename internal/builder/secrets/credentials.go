@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	buildConfig "se.quencer.io/api/v1alpha1/builds/config"
+	buildConfig "github.com/pier-oliviert/sequencer/api/v1alpha1/builds/config"
 )
 
 var ErrCredentialsIncomplete = errors.New("E#1013: couldn't create a valid credential")

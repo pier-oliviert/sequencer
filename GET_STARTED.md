@@ -23,7 +23,7 @@ Before you can deploy your first workspace, you'll need to gather the following:
 
 
 ```yaml
-apiVersion: se.quencer.io/v1alpha1
+apiVersion: github.com/pier-oliviert/sequencer/v1alpha1
 kind: Workspace
 metadata:
   labels:

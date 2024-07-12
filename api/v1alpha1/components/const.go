@@ -1,7 +1,7 @@
 package components
 
 import (
-	"se.quencer.io/api/v1alpha1/conditions"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
 )
 
 const (

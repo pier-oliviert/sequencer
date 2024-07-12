@@ -8,11 +8,11 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	sequencer "se.quencer.io/api/v1alpha1"
-	"se.quencer.io/api/v1alpha1/conditions"
-	"se.quencer.io/api/v1alpha1/workspaces"
-	"se.quencer.io/internal/integrations"
-	"se.quencer.io/internal/tunneling"
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/workspaces"
+	"github.com/pier-oliviert/sequencer/internal/integrations"
+	"github.com/pier-oliviert/sequencer/internal/tunneling"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 

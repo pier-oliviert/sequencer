@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"strings"
 
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/components"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/workspaces"
 	core "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/record"
-	sequencer "se.quencer.io/api/v1alpha1"
-	"se.quencer.io/api/v1alpha1/components"
-	"se.quencer.io/api/v1alpha1/conditions"
-	"se.quencer.io/api/v1alpha1/workspaces"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )

@@ -9,12 +9,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/components"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/workspaces"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	sequencer "se.quencer.io/api/v1alpha1"
-	"se.quencer.io/api/v1alpha1/components"
-	"se.quencer.io/api/v1alpha1/conditions"
-	"se.quencer.io/api/v1alpha1/workspaces"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 

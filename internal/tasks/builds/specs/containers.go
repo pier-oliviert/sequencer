@@ -3,10 +3,10 @@ package specs
 import (
 	"fmt"
 
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/builds"
 	core "k8s.io/api/core/v1"
 	"k8s.io/utils/env"
-	sequencer "se.quencer.io/api/v1alpha1"
-	"se.quencer.io/api/v1alpha1/builds"
 )
 
 func BuilderContainerFor(build *sequencer.Build) core.Container {

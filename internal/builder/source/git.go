@@ -9,8 +9,8 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport"
-	"se.quencer.io/api/v1alpha1/builds/config"
-	"se.quencer.io/internal/builder/secrets"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/builds/config"
+	"github.com/pier-oliviert/sequencer/internal/builder/secrets"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"

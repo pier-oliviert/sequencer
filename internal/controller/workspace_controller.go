@@ -33,10 +33,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	sequencer "se.quencer.io/api/v1alpha1"
-	"se.quencer.io/api/v1alpha1/workspaces"
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/workspaces"
 
-	tasks "se.quencer.io/internal/tasks/workspaces"
+	tasks "github.com/pier-oliviert/sequencer/internal/tasks/workspaces"
 )
 
 // WorkspaceReconciler reconciles a Workspace object

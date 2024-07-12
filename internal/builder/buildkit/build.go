@@ -12,7 +12,7 @@ import (
 	"k8s.io/utils/env"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"se.quencer.io/internal/builder/secrets"
+	"github.com/pier-oliviert/sequencer/internal/builder/secrets"
 )
 
 var ImagePath = fmt.Sprintf("%s/%s", os.TempDir(), "image")

@@ -32,7 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	sequencerv1alpha1 "se.quencer.io/api/v1alpha1"
+	sequencerv1alpha1 "github.com/pier-oliviert/sequencer/api/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 

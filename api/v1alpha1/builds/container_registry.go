@@ -1,6 +1,6 @@
 package builds
 
-import "se.quencer.io/api/v1alpha1/builds/config"
+import "github.com/pier-oliviert/sequencer/api/v1alpha1/builds/config"
 
 // +kubebuilder:object:generate=true
 type ContainerRegistry struct {

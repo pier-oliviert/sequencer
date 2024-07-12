@@ -15,7 +15,7 @@ resources:
   domain: pier-olivier.dev
   group: sequencer
   kind: Workspace
-  path: se.quencer.io/api/v1alpha1
+  path: github.com/pier-oliviert/sequencer/api/v1alpha1
   version: v1alpha1
 - api:
     crdVersion: v1
@@ -24,7 +24,7 @@ resources:
   domain: pier-olivier.dev
   group: sequencer
   kind: Build
-  path: se.quencer.io/api/v1alpha1
+  path: github.com/pier-oliviert/sequencer/api/v1alpha1
   version: v1alpha1
   webhooks:
     defaulting: true
@@ -37,6 +37,6 @@ resources:
   domain: pier-olivier.dev
   group: sequencer
   kind: Component
-  path: se.quencer.io/api/v1alpha1
+  path: github.com/pier-oliviert/sequencer/api/v1alpha1
   version: v1alpha1
 version: "3"

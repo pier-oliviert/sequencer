@@ -27,7 +27,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	sequencerv1alpha1 "se.quencer.io/api/v1alpha1"
+	sequencerv1alpha1 "github.com/pier-oliviert/sequencer/api/v1alpha1"
 )
 
 var _ = Describe("Component Controller", func() {

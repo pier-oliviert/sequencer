@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"se.quencer.io/api/v1alpha1/workspaces"
-	"se.quencer.io/internal/integrations"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/workspaces"
+	"github.com/pier-oliviert/sequencer/internal/integrations"
 )
 
 func NewProvider(ctx context.Context, controller integrations.ProviderController) (integrations.Provider, error) {

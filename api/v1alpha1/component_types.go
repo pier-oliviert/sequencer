@@ -17,11 +17,11 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/components"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
 	core "k8s.io/api/core/v1"
 	networking "k8s.io/api/networking/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"se.quencer.io/api/v1alpha1/components"
-	"se.quencer.io/api/v1alpha1/conditions"
 )
 
 type ComponentSpec struct {

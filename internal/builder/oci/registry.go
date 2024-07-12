@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	gcr "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
-	"se.quencer.io/api/v1alpha1/builds"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/builds"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 

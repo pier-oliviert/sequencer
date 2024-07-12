@@ -11,11 +11,11 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	builds "github.com/pier-oliviert/sequencer/api/v1alpha1/builds"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/record"
-	sequencer "se.quencer.io/api/v1alpha1"
-	builds "se.quencer.io/api/v1alpha1/builds"
-	"se.quencer.io/api/v1alpha1/conditions"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 

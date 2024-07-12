@@ -3,7 +3,7 @@ package buildkit
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"se.quencer.io/internal/builder/secrets"
+	"github.com/pier-oliviert/sequencer/internal/builder/secrets"
 )
 
 var _ = Describe("Buildkit Build", func() {

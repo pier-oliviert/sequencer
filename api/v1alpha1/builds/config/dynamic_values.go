@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"se.quencer.io/api/v1alpha1/utils"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/utils"
 )
 
 // DynamicValues are values provided by the user and that will be passed down to

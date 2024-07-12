@@ -37,8 +37,8 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	sequencer "se.quencer.io/api/v1alpha1"
-	"se.quencer.io/internal/controller"
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	"github.com/pier-oliviert/sequencer/internal/controller"
 
 	//+kubebuilder:scaffold:imports
 

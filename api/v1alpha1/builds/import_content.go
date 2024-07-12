@@ -1,7 +1,7 @@
 package builds
 
 import (
-	"se.quencer.io/api/v1alpha1/builds/config"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/builds/config"
 )
 
 // +kubebuilder:object:generate=true

@@ -17,8 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/workspaces"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"se.quencer.io/api/v1alpha1/workspaces"
 )
 
 // WorkspaceSpec defines the desired state of Workspace

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	builds "github.com/pier-oliviert/sequencer/api/v1alpha1/builds"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
 	core "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
-	sequencer "se.quencer.io/api/v1alpha1"
-	builds "se.quencer.io/api/v1alpha1/builds"
-	"se.quencer.io/api/v1alpha1/conditions"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )

@@ -32,11 +32,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	sequencer "se.quencer.io/api/v1alpha1"
-	"se.quencer.io/api/v1alpha1/builds"
-	"se.quencer.io/api/v1alpha1/components"
-	"se.quencer.io/api/v1alpha1/conditions"
-	tasks "se.quencer.io/internal/tasks/components"
+	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/builds"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/components"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
+	tasks "github.com/pier-oliviert/sequencer/internal/tasks/components"
 )
 
 // ComponentReconciler reconciles a Component object
@@ -152,7 +152,7 @@ func (r *ComponentReconciler) reconcileForBuildFunc(ctx context.Context, buildOb
 	}
 
 	for _, owner := range build.GetOwnerReferences() {
-		if owner.Kind == "Component" && owner.APIVersion == "se.quencer.io/v1alpha1" {
+		if owner.Kind == "Component" && owner.APIVersion == "github.com/pier-oliviert/sequencer/v1alpha1" {
 			requests = append(requests, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      owner.Name,
@@ -168,7 +168,7 @@ func (r *ComponentReconciler) reconcileForBuildFunc(ctx context.Context, buildOb
 func (r *ComponentReconciler) reconcileForPodFunc(ctx context.Context, pod client.Object) []reconcile.Request {
 	requests := []reconcile.Request{}
 	for _, owner := range pod.GetOwnerReferences() {
-		if owner.Kind == "Component" && owner.APIVersion == "se.quencer.io/v1alpha1" {
+		if owner.Kind == "Component" && owner.APIVersion == "github.com/pier-oliviert/sequencer/v1alpha1" {
 			requests = append(requests, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      owner.Name,

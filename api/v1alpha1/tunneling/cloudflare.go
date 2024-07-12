@@ -1,6 +1,6 @@
 package tunneling
 
-import "se.quencer.io/api/v1alpha1/utils"
+import "github.com/pier-oliviert/sequencer/api/v1alpha1/utils"
 
 type CloudflareConnector string
 
