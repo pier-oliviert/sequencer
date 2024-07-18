@@ -1,0 +1,19 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: solver
+    app.kubernetes.io/instance: {{ include "operator.fullname" . }}-solver
+    app.kubernetes.io/component: cert-manager
+    app.kubernetes.io/part-of: sequencer
+  {{- include "operator.labels" . | nindent 4 }}
+  name: {{ include "operator.fullname" . }}-solver
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+- kind: ServiceAccount
+  name: {{ include "operator.fullname" . }}-solver-reader
+  namespace: {{ .Release.Namespace }}

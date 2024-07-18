@@ -56,3 +56,12 @@ webhookService:
     protocol: TCP
     targetPort: 9443
   type: ClusterIP
+
+solver:
+  replicaCount: 1
+  image:
+    repository: solver
+    tag: dev
+  pullPolicy: Never
+  groupName: se.quencer.io
+  solverName: external-dns

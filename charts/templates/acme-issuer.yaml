@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ include "operator.fullname" . }}-acme-issuer
+  labels:
+  {{- include "operator.labels" . | nindent 4 }}
+spec:
+  acme:
+    zone: {{ .Values.certManager.zone | quote }}
+    email: {{ .Values.certManager.email | quote }}
+    privateKeySecretRef:
+      name: {{ .Values.certManager.privateKeySecretRef.name | quote }}
+  solvers:
+    - dns01:
+        webhook:
+          groupName: {{ .Values.solver.groupName | quote }}
+          solverName: {{ .Values.solver.name | quote }}

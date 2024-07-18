@@ -55,3 +55,7 @@ Create the name of the service account to use
 {{- include "operator.fullname" . }}-controller-manager
 {{- end }}
 {{- end }}
+
+{{- define "solver.servingCertificate" -}}
+{{ printf "%s-webhook-tls" (include "operator.fullname" .) }}
+{{- end -}}
