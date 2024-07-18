@@ -9,7 +9,7 @@ webhooks:
   clientConfig:
     service:
       name: webhook-service
-      namespace: system
+      namespace: sequencer-system
       path: /mutate-se-quencer-io-v1alpha1-build
   failurePolicy: Fail
   name: mbuild.se.quencer.io
@@ -34,7 +34,7 @@ webhooks:
   clientConfig:
     service:
       name: webhook-service
-      namespace: system
+      namespace: sequencer-system
       path: /validate-se-quencer-io-v1alpha1-build
   failurePolicy: Fail
   name: vbuild.se.quencer.io

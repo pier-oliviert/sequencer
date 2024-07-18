@@ -9,13 +9,13 @@ metadata:
     app.kubernetes.io/created-by: sequencer
     app.kubernetes.io/part-of: sequencer
     app.kubernetes.io/managed-by: kustomize
-  name: system
+  name: sequencer-system
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: buildkitd
-  namespace: system
+  namespace: sequencer-system
 data:
   buildkitd.toml: |
     debug = false
@@ -36,7 +36,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: controller-manager
-  namespace: system
+  namespace: sequencer-system
   labels:
     control-plane: controller-manager
     app.kubernetes.io/name: deployment

@@ -10,6 +10,7 @@ metadata:
     app.kubernetes.io/part-of: sequencer
     app.kubernetes.io/managed-by: kustomize
   name: leader-election-role
+  namespace: sequencer-system
 rules:
 - apiGroups:
   - ""

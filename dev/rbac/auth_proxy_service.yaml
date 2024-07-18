@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/part-of: sequencer
     app.kubernetes.io/managed-by: kustomize
   name: controller-manager-metrics-service
-  namespace: system
+  namespace: sequencer-system
 spec:
   ports:
   - name: https

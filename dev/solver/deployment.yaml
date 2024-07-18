@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: solver
+  namespace: sequencer-system
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: solver
+    app.kubernetes.io/instance: solver
+    app.kubernetes.io/component: cert-manager
+    app.kubernetes.io/created-by: sequencer
+    app.kubernetes.io/part-of: sequencer
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: solver
+      app.kubernetes.io/name: solver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: solver
+        app.kubernetes.io/name: solver
+    spec:
+      containers:
+      - command:
+        args:
+        image: solver:dev
+        name: solver
+        envFrom:
+          - configMapRef:
+              name: controller-manager
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+      serviceAccountName: controller-manager
+      terminationGracePeriodSeconds: 10

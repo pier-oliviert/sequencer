@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/part-of: sequencer
     app.kubernetes.io/managed-by: kustomize
   name: webhook-service
-  namespace: system
+  namespace: sequencer-system
 spec:
   ports:
     - port: 443

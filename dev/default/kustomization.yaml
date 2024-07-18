@@ -1,6 +1,3 @@
-# Adds namespace to all resources.
-namespace: sequencer-system
-
 # Value of this field is prepended to the
 # names of all resources, e.g. a deployment named
 # "wordpress" becomes "alices-wordpress".
@@ -19,6 +16,7 @@ resources:
 - ../manager
 - ../certmanager
 - ../webhook
+- ../solver
 # - ../crd
 # - ../prometheus
 
@@ -130,3 +128,14 @@ replacements:
          delimiter: '.'
          index: 1
          create: true
+
+transformers:
+  - |-
+    apiVersion: builtin
+    kind: NamespaceTransformer
+    metadata:
+      name: ignored
+      namespace: sequencer-system
+    unsetOnly: true
+    fieldSpecs:
+    - path: metadata/namespace

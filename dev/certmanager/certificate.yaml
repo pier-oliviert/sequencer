@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/part-of: sequencer
     app.kubernetes.io/managed-by: kustomize
   name: selfsigned-issuer
-  namespace: system
+  namespace: sequencer-system
 spec:
   selfSigned: {}
 ---
@@ -24,7 +24,7 @@ metadata:
     app.kubernetes.io/part-of: sequencer
     app.kubernetes.io/managed-by: kustomize
   name: serving-cert
-  namespace: system
+  namespace: sequencer-system
 spec:
   dnsNames:
   - SERVICE_NAME.SERVICE_NAMESPACE.svc

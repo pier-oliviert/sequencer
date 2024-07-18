@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: solver
+    app.kubernetes.io/instance: solver
+    app.kubernetes.io/component: cert-manager
+    app.kubernetes.io/created-by: sequencer
+    app.kubernetes.io/part-of: sequencer
+    app.kubernetes.io/managed-by: kustomize
+  name: solver
+  namespace: sequencer-system
+spec:
+  selector:
+    app.kubernetes.io/name: solver
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 5000
