@@ -42,8 +42,8 @@ import (
 
 	//+kubebuilder:scaffold:imports
 
+	"github.com/pier-oliviert/external-dns/endpoint"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/external-dns/endpoint"
 )
 
 var (
@@ -58,7 +58,7 @@ func init() {
 
 	// Need to register external-dns as a scheme here to use it
 	eDNSGroupVersion := schema.GroupVersion{
-		Group:   "externaldns.k8s.io",
+		Group:   "se.quencer.io",
 		Version: "v1alpha1",
 	}
 	scheme.AddKnownTypes(eDNSGroupVersion,

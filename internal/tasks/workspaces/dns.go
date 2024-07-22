@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pier-oliviert/external-dns/endpoint"
 	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
 	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
 	"github.com/pier-oliviert/sequencer/api/v1alpha1/workspaces"
@@ -12,7 +13,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/external-dns/endpoint"
 )
 
 type DNSReconciler struct {
