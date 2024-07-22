@@ -28,6 +28,11 @@ spec:
         args:
         image: solver:dev
         name: solver
+        env:
+          - name: GROUP_NAME
+            value: se.quencer.io
+          - name: SOLVER_NAME
+            value: external-dns
         envFrom:
           - configMapRef:
               name: controller-manager

@@ -106,6 +106,16 @@ rules:
 - apiGroups:
   - se.quencer.io
   resources:
+  - dnsendpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - watch
+- apiGroups:
+  - se.quencer.io
+  resources:
   - workspaces
   verbs:
   - create

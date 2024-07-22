@@ -53,6 +53,7 @@ type WorkspaceReconciler struct {
 //+kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 //+kubebuilder:rbac:groups="networking.k8s.io",resources=ingresses,verbs=get;watch;list;create;delete
 //+kubebuilder:rbac:groups="externaldns.k8s.io",resources=dnsendpoints,verbs=watch;get;list;create;delete
+//+kubebuilder:rbac:groups="se.quencer.io",resources=dnsendpoints,verbs=watch;get;list;create;delete
 
 func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var workspace sequencer.Workspace
