@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	LabelName string = "github.com/pier-oliviert/sequencer/build"
+	LabelName string = "se.quencer.io/build"
 )
 
 // +kubebuilder:validation:Enum=Initialized;Running;Success;Error

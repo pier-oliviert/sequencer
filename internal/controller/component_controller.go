@@ -152,7 +152,7 @@ func (r *ComponentReconciler) reconcileForBuildFunc(ctx context.Context, buildOb
 	}
 
 	for _, owner := range build.GetOwnerReferences() {
-		if owner.Kind == "Component" && owner.APIVersion == "github.com/pier-oliviert/sequencer/v1alpha1" {
+		if owner.Kind == "Component" && owner.APIVersion == "se.quencer.io/v1alpha1" {
 			requests = append(requests, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      owner.Name,
@@ -168,7 +168,7 @@ func (r *ComponentReconciler) reconcileForBuildFunc(ctx context.Context, buildOb
 func (r *ComponentReconciler) reconcileForPodFunc(ctx context.Context, pod client.Object) []reconcile.Request {
 	requests := []reconcile.Request{}
 	for _, owner := range pod.GetOwnerReferences() {
-		if owner.Kind == "Component" && owner.APIVersion == "github.com/pier-oliviert/sequencer/v1alpha1" {
+		if owner.Kind == "Component" && owner.APIVersion == "se.quencer.io/v1alpha1" {
 			requests = append(requests, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Name:      owner.Name,

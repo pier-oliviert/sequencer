@@ -22,11 +22,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-const kCloudflareTunnelFinalizer = "tunnel.github.com/pier-oliviert/sequencer/cloudflare"
+const kCloudflareTunnelFinalizer = "tunnel.se.quencer.io/cloudflare"
 const kCloudflareTunnelTokenEnvName = "CLOUDFLARE_TUNNEL_TOKEN"
 const kCloudflareTunnelIDKey = "TunnelID"
 const kCloudflareTunnelTokenKey = "TunnelToken"
-const kCloudflareConnectorLabel = "tunneling.github.com/pier-oliviert/sequencer/connector"
+const kCloudflareConnectorLabel = "tunneling.se.quencer.io/connector"
 const kConnectorGracefulTermination = time.Second * 5
 
 var cfTunnelDNSContentFmt = "%s.cfargotunnel.com"
