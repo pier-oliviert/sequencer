@@ -59,7 +59,7 @@ func (r *ComponentReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		if k8sErrors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, fmt.Errorf("E#5001: Couldn't retrieve the build (%s) -- %w", req.NamespacedName, err)
+		return ctrl.Result{}, fmt.Errorf("E#5001: Couldn't retrieve the component (%s) -- %w", req.NamespacedName, err)
 	}
 
 	if component.Status.Phase == "" {
