@@ -17,4 +17,4 @@ spec:
   ports:
     - protocol: TCP
       port: 443
-      targetPort: 5000
+      targetPort: 443

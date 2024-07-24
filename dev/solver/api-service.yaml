@@ -1,0 +1,16 @@
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.solver.se.quencer.io
+  labels:
+    app: sequencer-solver
+  annotations:
+    cert-manager.io/inject-ca-from: "sequencer-system/sequencer-serving-cert"
+spec:
+  group: solver.se.quencer.io
+  groupPriorityMinimum: 1000
+  versionPriority: 15
+  service:
+    name: sequencer-solver
+    namespace: sequencer-system
+  version: v1alpha1

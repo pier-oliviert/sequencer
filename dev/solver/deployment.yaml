@@ -26,16 +26,22 @@ spec:
       containers:
       - command:
         args:
+          - --tls-cert-file=/tls/tls.crt
+          - --tls-private-key-file=/tls/tls.key
         image: solver:dev
         name: solver
         env:
           - name: GROUP_NAME
-            value: se.quencer.io
+            value: solver.se.quencer.io
           - name: SOLVER_NAME
             value: external-dns
+          - name: SEQUENCER_NAMESPACE
+            value: sequencer-system
         envFrom:
           - configMapRef:
               name: controller-manager
+        ports:
+          - containerPort: 443
         resources:
           limits:
             cpu: 500m
@@ -43,5 +49,13 @@ spec:
           requests:
             cpu: 10m
             memory: 64Mi
+        volumeMounts:
+          - name: certs
+            mountPath: /tls
+            readOnly: true
+      volumes:
+        - name: certs
+          secret:
+            secretName: webhook-server-cert
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10

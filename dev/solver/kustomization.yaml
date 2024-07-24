@@ -4,3 +4,4 @@ resources:
 - deployment.yaml
 - service.yaml
 - rolebinding.yaml
+- api-service.yaml
