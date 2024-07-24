@@ -129,6 +129,3 @@ func (r *DNSReconciler) DNSEndpointExists(ctx context.Context, workspace *sequen
 
 	return len(list.Items) > 0, nil
 }
-
-func (r *DNSReconciler) record(ctx context.Context, workspace *sequencer.Workspace) {
-}

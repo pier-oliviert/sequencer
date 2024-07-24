@@ -14,6 +14,7 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/utils/env"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -106,9 +107,20 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 			Labels: map[string]string{
 				workspaces.InstanceLabel: workspace.Name,
 			},
+			Annotations: map[string]string{
+				"cert-manager.io/issuer":      env.GetString("CERT_MANAGER_CLUSTERISSUER", "sequencer-acme-issuer"),
+				"cert-manager.io/issuer-kind": "ClusterIssuer",
+			},
 		},
 		Spec: networking.IngressSpec{
 			IngressClassName: spec.ClassName,
+			TLS: []networking.IngressTLS{{
+				Hosts: []string{
+					workspace.Status.DNS.Hostname,
+					fmt.Sprintf("*.%s", workspace.Status.DNS.Hostname),
+				},
+				SecretName: fmt.Sprintf("%s-tls", workspace.Name),
+			}},
 		},
 	}
 
