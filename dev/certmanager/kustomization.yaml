@@ -1,6 +1,7 @@
 resources:
 - certificate.yaml
 - distribution.yaml
+- cluster-issuer.yaml
 
 configurations:
 - kustomizeconfig.yaml

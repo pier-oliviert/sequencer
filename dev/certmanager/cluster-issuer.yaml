@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: acme-issuer
+spec:
+  acme:
+    email: test@myexample.com
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: acme-issuer-secret
+    solvers:
+      - dns01:
+          webhook:
+            groupName: solver.se.quencer.io
+            solverName: external-dns
