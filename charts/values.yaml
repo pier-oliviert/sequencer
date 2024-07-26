@@ -29,7 +29,7 @@ controllerManager:
       capabilities:
         drop:
         - ALL
-    image: pothibo/sequencer-operator:0.1
+    image: operator:dev
     resources:
       limits:
         cpu: 500m
@@ -40,7 +40,7 @@ controllerManager:
   replicas: 1
   serviceAccount:
     annotations: {}
-  builderImage: pothibo/sequencer-builder:0.1
+  builderImage: builder:dev
   buildkitVersion: v0.12.4
 kubernetesClusterDomain: cluster.local
 metricsService:
@@ -57,11 +57,82 @@ webhookService:
     targetPort: 9443
   type: ClusterIP
 
+certManager:
+  serviceAccount:
+    name: cert-manager
+    namespace: cert-manager
+  server: https://acme-staging-v02.api.letsencrypt.org/directory
+  email: your@email.com
+  privateKeySecretRef:
+    name: acme-cert-tls
+
 solver:
+  name: external-dns
+  groupName: solver.se.quencer.io
+  privateKeySecretRef:
+    name: acme-cert-tls
   replicaCount: 1
   image:
     repository: solver
     tag: dev
   pullPolicy: Never
-  groupName: se.quencer.io
-  solverName: external-dns
+
+externalDNS:
+  replicaCount: 1
+  image:
+    repository: external-dns
+    tag: dev
+    pullPolicy: IfNotPresent
+  podSecurityContext:
+    runAsNonRoot: true
+    fsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    privileged: false
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    capabilities:
+      drop: ["ALL"]
+  log:
+    level: info
+    format: text
+  interval: 10s
+  policy: sync
+  registry: crd
+  sources:
+    - service
+    - ingress
+    - crd
+  recordTypes:
+    - A
+    - AAAA
+    - CNAME
+    - TXT
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 2
+    successThreshold: 1
+  readinessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  provider:
+    name: cloudflare

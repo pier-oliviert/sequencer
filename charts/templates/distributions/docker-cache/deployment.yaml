@@ -56,5 +56,5 @@ spec:
         secret:
           secretName: distribution-cert
       - configMap:
-          name: {{ include "operator.fullname" . }}-docker-cache.yml
+          name: {{ include "operator.fullname" . }}-docker-cache
         name: distribution-config

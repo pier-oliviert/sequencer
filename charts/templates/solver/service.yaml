@@ -11,10 +11,9 @@ metadata:
 spec:
   type: ClusterIP
   selector:
+    {{ include "operator.labels" . | nindent 4 }}
     app.kubernetes.io/name: solver
     app.kubernetes.io/instance: {{ include "operator.fullname" . }}-solver
-    app.kubernetes.io/component: cert-manager
-    app.kubernetes.io/part-of: sequencer
   ports:
     - port: 443
       targetPort: https

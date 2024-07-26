@@ -11,6 +11,6 @@ spec:
   - '{{ include "operator.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc.{{
     .Values.kubernetesClusterDomain }}'
   issuerRef:
-    kind: Issuer
+    kind: ClusterIssuer
     name: '{{ include "operator.fullname" . }}-selfsigned-issuer'
   secretName: webhook-server-cert

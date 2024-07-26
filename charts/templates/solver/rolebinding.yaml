@@ -1,3 +1,8 @@
+# This RoleBinding exists so the solver can retrieve
+# The authentication information to be able to connect and
+# authenticate to K8s API Server.
+# The big difference here is that this needs to be created as a scoped
+# resource within the `kube-system` namespace.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -7,7 +12,7 @@ metadata:
     app.kubernetes.io/component: cert-manager
     app.kubernetes.io/part-of: sequencer
   {{- include "operator.labels" . | nindent 4 }}
-  name: {{ include "operator.fullname" . }}-solver
+  name: {{ include "operator.fullname" . }}:apiserver-reader
   namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -15,5 +20,37 @@ roleRef:
   name: extension-apiserver-authentication-reader
 subjects:
 - kind: ServiceAccount
-  name: {{ include "operator.fullname" . }}-solver-reader
+  name: {{ include "operator.fullname" . }}-solver
   namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "operator.fullname" . }}:domain-solver
+  labels:
+    {{- include "operator.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "operator.fullname" . }}:dns01-solver
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: {{ include "operator.fullname" . }}-solver
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "operator.fullname" . }}:auth-delegator
+  labels:
+    {{- include "operator.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: {{ include "operator.fullname" . }}-solver
+    namespace: {{ .Release.Namespace }}

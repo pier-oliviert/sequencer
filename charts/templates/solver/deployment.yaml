@@ -13,15 +13,17 @@ spec:
   replicas: {{ .Values.solver.replicaCount }}
   selector:
     matchLabels:
+      {{ include "operator.labels" . | nindent 6 }}
       app.kubernetes.io/name: solver
       app.kubernetes.io/instance: {{ include "operator.fullname" . }}-solver
   template:
     metadata:
       labels:
+        {{ include "operator.labels" . | nindent 8 }}
         app.kubernetes.io/name: solver
         app.kubernetes.io/instance: {{ include "operator.fullname" . }}-solver
     spec:
-      serviceAccountName: {{ include "operator.fullname" . }}-solver-reader
+      serviceAccountName: {{ include "operator.fullname" . }}-solver
       containers:
         - name: solver
           image: "{{ .Values.solver.image.repository }}:{{ .Values.solver.image.tag }}"
@@ -34,7 +36,8 @@ spec:
               value: {{ .Values.solver.groupName | quote }}
             - name: SOLVER_NAME
               value: {{ .Values.solver.name | quote }}
-          ports:
+            - name: SEQUENCER_NAMESPACE
+              value: {{ .Release.Namespace }}
           ports:
             - name: https
               containerPort: 443
@@ -54,11 +57,11 @@ spec:
               mountPath: /tls
               readOnly: true
           resources:
-{{ toYaml .Values.solver.resources | indent 12 }}
+            {{ toYaml .Values.solver.resources | indent 12 }}
       volumes:
         - name: certs
           secret:
-            secretName: {{ include "solver.servingCertificate" . }}
+            secretName: {{ .Values.solver.privateKeySecretRef.name }}
     {{- with .Values.solver.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

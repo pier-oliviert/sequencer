@@ -4,14 +4,13 @@ metadata:
   name: {{ include "operator.fullname" . }}-webhook-service
   namespace: {{ .Release.Namespace }}
   labels:
+    {{- include "operator.labels" . | nindent 4 }}
     app.kubernetes.io/component: webhook
-    app.kubernetes.io/created-by: sequencer
     app.kubernetes.io/part-of: sequencer
-  {{- include "operator.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.webhookService.type }}
   selector:
     control-plane: controller-manager
-  {{- include "operator.selectorLabels" . | nindent 4 }}
+    {{- include "operator.labels" . | nindent 4 }}
   ports:
 	{{- .Values.webhookService.ports | toYaml | nindent 2 }}

@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "operator.fullname" . }}:dns01-solver
+  labels:
+    app: {{ include "operator.fullname" . }}-solver
+rules:
+  - apiGroups:
+      - {{ .Values.solver.groupName }}
+    resources:
+      - '*'
+    verbs:
+      - 'create'
+  - apiGroups: ["se.quencer.io"]
+    resources: ["dnsendpoints"]
+    verbs: ["*"]

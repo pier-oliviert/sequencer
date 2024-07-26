@@ -30,19 +30,11 @@ Common labels
 */}}
 {{- define "operator.labels" -}}
 helm.sh/chart: {{ include "operator.chart" . }}
-{{ include "operator.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end }}
-
-{{/*
-Selector labels
-*/}}
-{{- define "operator.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "operator.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/part-of: {{ include "operator.name" . }}
 {{- end }}
 
 {{/*
@@ -56,6 +48,17 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
-{{- define "solver.servingCertificate" -}}
-{{ printf "%s-webhook-tls" (include "operator.fullname" .) }}
-{{- end -}}
+{{- define "operator.externalDNS.image" -}}
+{{- printf "%s:%s" .Values.externalDNS.image.repository (default (printf "v%s" .Chart.AppVersion) .Values.externalDNS.image.tag) }}
+{{- end }}
+
+{{/*
+Provider name, Keeps backward compatibility on provider
+*/}}
+{{- define "operator.externalDNS.providerName" -}}
+{{- if eq (typeOf .Values.externalDNS.provider) "string" }}
+{{- .Values.externalDNS.provider }}
+{{- else }}
+{{- .Values.externalDNS.provider.name }}
+{{- end }}
+{{- end }}
