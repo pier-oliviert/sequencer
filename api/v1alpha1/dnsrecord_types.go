@@ -4,15 +4,27 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// DNSRecordSpec defines the desired state of DNSRecord
+// Represent a single DNS Record
+// The record will be created and metadata about the record will
+// be stored in the Status.
 type DNSRecordSpec struct {
 	RecordType string `json:"recordType,omitempty"`
 	Name       string `json:"name,omitempty"`
 	Target     string `json:"target,omitempty"`
+
+	// Provider specific configuration settings that can be used
+	// to configure a DNS Record in accordance to the provider used.
+	// Each provider provides its own set of custom fields.
+	Settings map[string]string `json:"settings,omitempty"`
 }
 
 // DNSRecordStatus defines the observed state of DNSRecord
 type DNSRecordStatus struct {
+	// Name of the provider that was used to create this record.
+	Provider string `json:"provider,omitempty"`
+
+	// RemoteID is the ID, if available for the record that was created
+	RemoteID *string `json:"remoteID,omitempty"`
 }
 
 // +kubebuilder:object:root=true
