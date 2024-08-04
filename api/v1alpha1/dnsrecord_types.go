@@ -2,6 +2,9 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
+	dnsrecords "github.com/pier-oliviert/sequencer/api/v1alpha1/dnsrecords"
 )
 
 // Represent a single DNS Record
@@ -18,15 +21,6 @@ type DNSRecordSpec struct {
 	Settings map[string]string `json:"settings,omitempty"`
 }
 
-// DNSRecordStatus defines the observed state of DNSRecord
-type DNSRecordStatus struct {
-	// Name of the provider that was used to create this record.
-	Provider string `json:"provider,omitempty"`
-
-	// RemoteID is the ID, if available for the record that was created
-	RemoteID *string `json:"remoteID,omitempty"`
-}
-
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
@@ -35,8 +29,25 @@ type DNSRecord struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   DNSRecordSpec   `json:"spec,omitempty"`
-	Status DNSRecordStatus `json:"status,omitempty"`
+	Spec   DNSRecordSpec     `json:"spec,omitempty"`
+	Status dnsrecords.Status `json:"status,omitempty"`
+}
+
+func (r DNSRecord) CurrentPhase() dnsrecords.Phase {
+	if !r.ObjectMeta.DeletionTimestamp.IsZero() {
+		return dnsrecords.PhaseTerminating
+	}
+
+	if len(r.Status.Conditions) == 0 {
+		return dnsrecords.PhaseInitializing
+	}
+
+	if conditions.IsAnyConditionWithStatus(r.Status.Conditions, conditions.ConditionError) {
+		return dnsrecords.PhaseError
+	}
+
+	// All other possibilities exhausted, the record must have been created
+	return dnsrecords.PhaseCreated
 }
 
 // +kubebuilder:object:root=true
