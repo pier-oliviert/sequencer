@@ -11,9 +11,10 @@ import (
 // The record will be created and metadata about the record will
 // be stored in the Status.
 type DNSRecordSpec struct {
-	RecordType string `json:"recordType,omitempty"`
-	Name       string `json:"name,omitempty"`
-	Target     string `json:"target,omitempty"`
+	Zone       string `json:"zone"`
+	RecordType string `json:"recordType"`
+	Name       string `json:"name"`
+	Target     string `json:"target"`
 
 	// Provider specific configuration settings that can be used
 	// to configure a DNS Record in accordance to the provider used.
