@@ -19,7 +19,7 @@ type DNSRecordSpec struct {
 	// Provider specific configuration settings that can be used
 	// to configure a DNS Record in accordance to the provider used.
 	// Each provider provides its own set of custom fields.
-	Settings map[string]string `json:"settings,omitempty"`
+	Properties map[string]string `json:"properties,omitempty"`
 }
 
 // +kubebuilder:object:root=true

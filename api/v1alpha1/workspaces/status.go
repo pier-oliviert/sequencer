@@ -9,7 +9,7 @@ type Status struct {
 	Phase      Phase                  `json:"phase"`
 	Conditions []conditions.Condition `json:"conditions,omitempty"`
 	Tunnel     *Tunnel                `json:"tunnel,omitempty"`
-	DNS        *DNS                   `json:"dns,omitempty"`
+	Host       string                 `json:"host"`
 }
 
 // +kubebuilder:object:generate=true
@@ -22,22 +22,6 @@ type Tunnel struct {
 	// If a secret value needs to be provided, a secret can be created by
 	// the provider and the reference to the secret can be added to this field.
 	ProviderMeta map[string]string `json:"meta"`
-}
-
-// +kubebuilder:object:generate=true
-type DNS struct {
-	Hostname string `json:"hostname"`
-
-	Records []DNSRecord `json:"records,omitempty"`
-}
-
-// +kubebuilder:object:generate=true
-type DNSRecord struct {
-	Name   string `json:"name"`
-	Type   string `json:"type"`
-	Target string `json:"target"`
-
-	Properties map[string]string `json:"properties,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=Deploying;Healthy;Error;Terminating

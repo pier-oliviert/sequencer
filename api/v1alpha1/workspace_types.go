@@ -30,7 +30,7 @@ type WorkspaceSpec struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`
-// +kubebuilder:printcolumn:name="Hostname",type=string,JSONPath=`.status.dns.hostname`
+// +kubebuilder:printcolumn:name="Hostname",type=string,JSONPath=`.status.host`
 type Workspace struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
