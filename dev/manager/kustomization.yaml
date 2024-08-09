@@ -10,7 +10,7 @@ images:
   newTag: latest
 configMapGenerator:
 - literals:
-  - BUILDER_IMAGE=builder:dev
+  - BUILDER_IMAGE=sequencer-builder:dev
   - BUILDKIT_VERSION=v0.12.4
   - CONTROLLER_SERVICE_ACCOUNT=sequencer-controller-manager
   - BUILDKITD_CONFIG_NAME=sequencer-buildkitd

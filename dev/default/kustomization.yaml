@@ -17,8 +17,7 @@ resources:
 - ../certmanager
 - ../webhook
 - ../solver
-# - ../crd
-# - ../prometheus
+- ../dns
 
 patches:
 # Protect the /metrics endpoint by putting it behind auth.

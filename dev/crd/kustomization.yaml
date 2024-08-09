@@ -5,6 +5,7 @@ resources:
 - bases/se.quencer.io_workspaces.yaml
 - bases/se.quencer.io_builds.yaml
 - bases/se.quencer.io_components.yaml
+- bases/se.quencer.io_dnsrecords.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patches:

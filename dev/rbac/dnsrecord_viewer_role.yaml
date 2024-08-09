@@ -1,0 +1,23 @@
+# permissions for end users to view dnsrecords.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: sequencer
+    app.kubernetes.io/managed-by: kustomize
+  name: dnsrecord-viewer-role
+rules:
+- apiGroups:
+  - sequencer.se.quencer.io
+  resources:
+  - dnsrecords
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - sequencer.se.quencer.io
+  resources:
+  - dnsrecords/status
+  verbs:
+  - get

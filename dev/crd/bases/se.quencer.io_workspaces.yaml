@@ -18,7 +18,7 @@ spec:
     - jsonPath: .status.phase
       name: Phase
       type: string
-    - jsonPath: .status.dns.hostname
+    - jsonPath: .status.host
       name: Hostname
       type: string
     name: v1alpha1
@@ -4397,6 +4397,16 @@ spec:
                       className:
                         default: nginx
                         type: string
+                      loadBalancerRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        required:
+                        - name
+                        - namespace
+                        type: object
                       rules:
                         items:
                           properties:
@@ -4418,6 +4428,7 @@ spec:
                           type: object
                         type: array
                     required:
+                    - loadBalancerRef
                     - rules
                     type: object
                   tunnel:
@@ -4510,31 +4521,28 @@ spec:
                   type: object
                 type: array
               dns:
-                properties:
-                  hostname:
-                    type: string
-                  records:
-                    items:
-                      properties:
-                        name:
-                          type: string
-                        properties:
-                          additionalProperties:
-                            type: string
-                          type: object
-                        target:
-                          type: string
-                        type:
-                          type: string
-                      required:
-                      - name
-                      - target
-                      - type
+                items:
+                  properties:
+                    name:
+                      type: string
+                    properties:
+                      additionalProperties:
+                        type: string
                       type: object
-                    type: array
-                required:
-                - hostname
-                type: object
+                    recordType:
+                      type: string
+                    target:
+                      type: string
+                  required:
+                  - name
+                  - recordType
+                  - target
+                  type: object
+                type: array
+              host:
+                type: string
+              ingress:
+                type: string
               phase:
                 enum:
                 - Deploying
@@ -4544,18 +4552,15 @@ spec:
                 type: string
               tunnel:
                 properties:
-                  hostname:
-                    type: string
                   meta:
                     additionalProperties:
                       type: string
                     type: object
-                  provider:
+                  remoteId:
                     type: string
                 required:
-                - hostname
                 - meta
-                - provider
+                - remoteId
                 type: object
             required:
             - phase

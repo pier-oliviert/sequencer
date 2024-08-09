@@ -84,7 +84,6 @@ spec:
     spec:
       containers:
       - image: registry:latest
-        env:
         name: distribution
         resources:
           limits:

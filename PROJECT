@@ -2,11 +2,11 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: pier-olivier.dev
+domain: se.quencer.io
 layout:
 - go.kubebuilder.io/v4
 projectName: sequencer
-repo: se.quencer.io
+repo: github.com/pier-oliviert/sequencer
 resources:
 - api:
     crdVersion: v1
@@ -37,6 +37,14 @@ resources:
   domain: pier-olivier.dev
   group: sequencer
   kind: Component
+  path: github.com/pier-oliviert/sequencer/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: se.quencer.io
+  group: sequencer
+  kind: DNSRecord
   path: github.com/pier-oliviert/sequencer/api/v1alpha1
   version: v1alpha1
 version: "3"
