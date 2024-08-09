@@ -64,7 +64,7 @@ vet: ## Run go vet against code.
 dev: manifests generate kustomize fmt vet
 	$(KUSTOMIZE) build dev/crd | $(KUBECTL) apply -f -
 	$(KUSTOMIZE) build dev/default | $(KUBECTL) apply -f -
-	docker build -t operator:dev --target operator . && kind load docker-image operator:dev
+	docker build -t sequencer-operator:dev --target operator . && kind load docker-image sequencer-operator:dev
 
 .PHONY: test
 test: manifests generate fmt vet envtest ## Run tests.
