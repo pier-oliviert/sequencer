@@ -133,7 +133,7 @@ func (c *controller) UpdateCondition(ctx context.Context, status conditions.Cond
 	condition.Status = status
 	condition.Reason = reason
 
-	conditions.SetStatusCondition(&c.workspace.Status.Conditions, condition)
+	conditions.SetCondition(&c.workspace.Status.Conditions, condition)
 	c.condition = condition
 
 	return c.Status().Update(ctx, c.workspace)

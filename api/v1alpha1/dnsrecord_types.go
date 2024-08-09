@@ -1,6 +1,8 @@
 package v1alpha1
 
 import (
+	"errors"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
@@ -49,6 +51,17 @@ func (r DNSRecord) CurrentPhase() dnsrecords.Phase {
 
 	// All other possibilities exhausted, the record must have been created
 	return dnsrecords.PhaseCreated
+}
+
+// Finds the first condition that has an Error status and return
+// the Reason as an error.
+func (r DNSRecord) ConditionError() error {
+	condition := conditions.FindStatusCondition(r.Status.Conditions, conditions.ConditionError)
+	if condition != nil {
+		return errors.New(condition.Reason)
+	}
+
+	return nil
 }
 
 // +kubebuilder:object:root=true

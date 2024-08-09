@@ -37,7 +37,7 @@ func (r *ComponentsReconciler) ReconcileComponentHealth(ctx context.Context, wor
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("E#5002: failed to retrieve the list of DNS Records -- %w", err)
 	}
 
 	var componentsHealthy []*sequencer.Component
@@ -49,7 +49,7 @@ func (r *ComponentsReconciler) ReconcileComponentHealth(ctx context.Context, wor
 		}
 
 		if component.Status.Phase == components.PhaseError {
-			conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+			conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 				Type:   workspaces.ComponentCondition,
 				Status: conditions.ConditionError,
 				Reason: fmt.Sprintf("Error in component (%s)", component.Name),
@@ -63,7 +63,7 @@ func (r *ComponentsReconciler) ReconcileComponentHealth(ctx context.Context, wor
 	}
 
 	if len(componentsHealthy) == len(workspace.Spec.Components) && workspace.Status.Phase != workspaces.PhaseHealthy {
-		conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 			Type:   workspaces.ComponentCondition,
 			Status: conditions.ConditionHealthy,
 			Reason: "All components are healthy",
@@ -84,7 +84,7 @@ func (r *ComponentsReconciler) Reconcile(ctx context.Context, workspace *sequenc
 		return nil, nil
 	}
 
-	condition := conditions.FindStatusCondition(workspace.Status.Conditions, workspaces.ComponentCondition)
+	condition := conditions.FindCondition(workspace.Status.Conditions, workspaces.ComponentCondition)
 	if condition == nil {
 		condition = &conditions.Condition{
 			Type:   workspaces.ComponentCondition,
@@ -97,7 +97,7 @@ func (r *ComponentsReconciler) Reconcile(ctx context.Context, workspace *sequenc
 		return r.ReconcileComponentHealth(ctx, workspace)
 	}
 
-	conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 		Type:   workspaces.ComponentCondition,
 		Status: conditions.ConditionInProgress,
 		Reason: "Deploying components",
@@ -109,7 +109,7 @@ func (r *ComponentsReconciler) Reconcile(ctx context.Context, workspace *sequenc
 	for _, component := range workspace.Spec.Components {
 		err := r.createComponent(ctx, workspace, &component)
 		if err != nil {
-			conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+			conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 				Type:   workspaces.ComponentCondition,
 				Status: conditions.ConditionError,
 				Reason: fmt.Sprintf("Error creating component (%s)", component.Name),
@@ -122,7 +122,7 @@ func (r *ComponentsReconciler) Reconcile(ctx context.Context, workspace *sequenc
 		}
 	}
 
-	conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 		Type:   workspaces.ComponentCondition,
 		Status: conditions.ConditionCreated,
 		Reason: workspaces.ConditionReasonDeploying,

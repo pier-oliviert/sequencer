@@ -30,7 +30,7 @@ type VariablesReconciler struct {
 
 func (r *VariablesReconciler) Reconcile(ctx context.Context, component *sequencer.Component) (*ctrl.Result, error) {
 	_ = log.FromContext(ctx)
-	condition := conditions.FindStatusCondition(component.Status.Conditions, components.VariablesCondition)
+	condition := conditions.FindCondition(component.Status.Conditions, components.VariablesCondition)
 	if condition == nil {
 		condition = &conditions.Condition{
 			Type:   components.VariablesCondition,
@@ -44,7 +44,7 @@ func (r *VariablesReconciler) Reconcile(ctx context.Context, component *sequence
 		return nil, nil
 	}
 
-	conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 		Type:   components.VariablesCondition,
 		Status: conditions.ConditionInProgress,
 		Reason: components.ConditionReasonProcessing,
@@ -56,7 +56,7 @@ func (r *VariablesReconciler) Reconcile(ctx context.Context, component *sequence
 
 	// If the component is not part of a workspace, this reconciliation loop can be skipped.
 	if _, ok := component.Labels[workspaces.InstanceLabel]; !ok {
-		conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.VariablesCondition,
 			Status: conditions.ConditionCompleted,
 			Reason: "Skipped, component is not part of a workspace",
@@ -68,7 +68,7 @@ func (r *VariablesReconciler) Reconcile(ctx context.Context, component *sequence
 		if strings.HasPrefix(container.Image, components.InterpolationDelimStart) {
 			variable, err := r.VariableFrom(ctx, container.Image, component)
 			if err != nil {
-				conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+				conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 					Type:   components.VariablesCondition,
 					Status: conditions.ConditionError,
 					Reason: err.Error(),
@@ -87,7 +87,7 @@ func (r *VariablesReconciler) Reconcile(ctx context.Context, component *sequence
 
 			variable, err := r.VariableFrom(ctx, env.Value, component)
 			if err != nil {
-				conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+				conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 					Type:   components.VariablesCondition,
 					Status: conditions.ConditionError,
 					Reason: err.Error(),
@@ -100,7 +100,7 @@ func (r *VariablesReconciler) Reconcile(ctx context.Context, component *sequence
 		}
 	}
 
-	conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 		Type:   components.VariablesCondition,
 		Status: conditions.ConditionCompleted,
 		Reason: "All variables processed",

@@ -61,6 +61,7 @@ Workspace errors are top level errors that aren't specific to any of the underly
 |3010|*Could not create and configure the tunnel*|There was an error creating the tunnel. It may be orphaned on the integration's side|
 |3011|*The DNS Spec doesn't include a valid provider*|The DNS Spec included in the workspace spec does not use a valid provider. The list of provider is available in the [documentation](../docs/specs/workspace.md#networking)|
 |3012|*The Tunnel Spec doesn't include a valid provider*|The Tunnel Spec included in the workspace spec does not use a valid provider. The list of provider is available in the [documentation](../docs/specs/workspace.md#networking)|
+|3013|*Could not retrieve the load balancer*|The service type=LoadBalancer could not be found matching the reference provided. Make sure it exists and the namespace/name are correct|
 
 ## Integration Errors
 

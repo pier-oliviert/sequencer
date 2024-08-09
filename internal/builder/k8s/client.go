@@ -124,7 +124,7 @@ type Task func(Tracker) error
 // This method returns a StagedCondition, but doesn't persist anything up to this point.
 // To do actual work, the user of this StagedCondition need to invoke +Do+.
 func (c *Client) StageCondition(build *sequencer.Build, conditionType conditions.ConditionType) StagedCondition {
-	condition := conditions.FindStatusCondition(build.Status.Conditions, conditionType)
+	condition := conditions.FindCondition(build.Status.Conditions, conditionType)
 	if condition == nil {
 		condition = &conditions.Condition{
 			Type:   conditionType,
@@ -213,7 +213,7 @@ func (t Tracker) Error(err error) {
 // Updates the staged condition to the status provided with the reason given. It commits the condition to the
 // BuildStatus so this will do a roundtrip to the kubernetes backend. This is like a checkpoint for the build process.
 func (t Tracker) Update(status conditions.ConditionStatus, reason string) error {
-	conditions.SetStatusCondition(&t.build.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&t.build.Status.Conditions, conditions.Condition{
 		Type:   t.condition.Type,
 		Status: status,
 		Reason: reason,

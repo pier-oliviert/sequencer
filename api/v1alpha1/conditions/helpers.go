@@ -6,11 +6,11 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func SetStatusCondition(conditions *[]Condition, newCondition Condition) (changed bool) {
+func SetCondition(conditions *[]Condition, newCondition Condition) (changed bool) {
 	if conditions == nil {
 		return false
 	}
-	existingCondition := FindStatusCondition(*conditions, newCondition.Type)
+	existingCondition := FindCondition(*conditions, newCondition.Type)
 	if existingCondition == nil {
 		if newCondition.LastTransitionTime.IsZero() {
 			newCondition.LastTransitionTime = meta.NewTime(time.Now())
@@ -41,7 +41,7 @@ func SetStatusCondition(conditions *[]Condition, newCondition Condition) (change
 	return changed
 }
 
-func RemoveStatusCondition(conditions *[]Condition, conditionType ConditionType) (removed bool) {
+func RemoveCondition(conditions *[]Condition, conditionType ConditionType) (removed bool) {
 	if conditions == nil || len(*conditions) == 0 {
 		return false
 	}
@@ -58,10 +58,21 @@ func RemoveStatusCondition(conditions *[]Condition, conditionType ConditionType)
 	return removed
 }
 
-// FindStatusCondition finds the conditionType in conditions.
-func FindStatusCondition(conditions []Condition, conditionType ConditionType) *Condition {
+// FindStatusCondition finds the condition that has the given conditionType
+func FindCondition(conditions []Condition, conditionType ConditionType) *Condition {
 	for i := range conditions {
 		if conditions[i].Type == conditionType {
+			return &conditions[i]
+		}
+	}
+
+	return nil
+}
+
+// FindStatusCondition finds the first condition that has the given conditionStatus
+func FindStatusCondition(conditions []Condition, conditionStatus ConditionStatus) *Condition {
+	for i := range conditions {
+		if conditions[i].Status == conditionStatus {
 			return &conditions[i]
 		}
 	}

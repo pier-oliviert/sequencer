@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pier-oliviert/external-dns/endpoint"
 	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
 	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
 	"github.com/pier-oliviert/sequencer/api/v1alpha1/workspaces"
@@ -21,48 +20,54 @@ type DNSReconciler struct {
 }
 
 func (r *DNSReconciler) Reconcile(ctx context.Context, workspace *sequencer.Workspace) (*ctrl.Result, error) {
-	if workspace.Status.DNS == nil {
-		workspace.Status.DNS = &workspaces.DNS{
-			Hostname: fmt.Sprintf("%s.%s", workspace.Name, workspace.Spec.Networking.DNS.Zone),
-		}
-
-		conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
-			Type:   workspaces.DNSCondition,
-			Status: conditions.ConditionInitialized,
-			Reason: "DNS Initialized",
-		})
-		return &ctrl.Result{}, r.Status().Update(ctx, workspace)
-	}
-
-	if len(workspace.Status.DNS.Records) == 0 {
+	if conditions.IsStatusConditionPresentAndEqual(workspace.Status.Conditions, workspaces.DNSCondition, conditions.ConditionError) {
+		// An error for this conditions is fatal. Exit this reconciliation.
 		return nil, nil
 	}
 
-	conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
-		Type:   workspaces.DNSCondition,
-		Status: conditions.ConditionLocked,
-		Reason: "Locked to create resources",
-	})
-
-	createdRecords := false
-
-	// For each records present, the reconciler will try to retrieve a DNSEndpoint
-	// if it doesn't exist, it will create a new one.
-	for _, record := range workspace.Status.DNS.Records {
-		exists, err := r.DNSEndpointExists(ctx, workspace, &record)
+	if conditions.IsStatusConditionPresentAndEqual(workspace.Status.Conditions, workspaces.DNSCondition, conditions.ConditionCompleted) {
+		// This workspace reconciliation loop is completed, but it's possible that the DNSRecord that were created here failed.
+		// If any of the DNSRecord created has an error, mark this condition as errored by fetching the conditions' error on the DNS record
+		// and copying it to this condition.
+		selector, err := labels.Parse(fmt.Sprintf("%s=%s", workspaces.InstanceLabel, workspace.Name))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("E#3001: failed to parse the label selector -- %w", err)
 		}
 
-		// Not updating records as of now. If it exists, it means it's configured
-		if exists {
-			continue
+		var list sequencer.DNSRecordList
+		err = r.List(ctx, &list, &client.ListOptions{
+			LabelSelector: selector,
+			Namespace:     workspace.Namespace,
+		})
+
+		if err != nil {
+			return nil, fmt.Errorf("E#5002: failed to retrieve the list of DNS Records -- %w", err)
 		}
 
-		dnsEndpoint := &endpoint.DNSEndpoint{
+		for _, record := range list.Items {
+			if err := record.ConditionError(); err != nil {
+				conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
+					Type:   workspaces.DNSCondition,
+					Status: conditions.ConditionError,
+					Reason: err.Error(),
+				})
+
+				// It's possible that more than one DNS record has an error, but it would massively increase the
+				// complexity of surfacing those errors back to the user through conditions. Instead, the reconciliation
+				// process will only surface the first error it finds and push it to the global condition.
+				return &ctrl.Result{}, r.Status().Patch(ctx, &record, client.Merge)
+			}
+		}
+
+		// The condition is completed and all DNS Records entries are healthy as far as this reconciliation loop is concerned.
+		return nil, nil
+	}
+
+	for _, expected := range workspace.Status.DNS {
+		record := &sequencer.DNSRecord{
 			ObjectMeta: meta.ObjectMeta{
 				Labels: map[string]string{
-					workspaces.DNSLabel:      record.Name,
+					workspaces.DNSLabel:      expected.Name,
 					workspaces.InstanceLabel: workspace.Name,
 				},
 				OwnerReferences: []meta.OwnerReference{{
@@ -74,58 +79,32 @@ func (r *DNSReconciler) Reconcile(ctx context.Context, workspace *sequencer.Work
 				GenerateName: fmt.Sprintf("%s-", workspace.Name),
 				Namespace:    workspace.Namespace,
 			},
-			Spec: endpoint.DNSEndpointSpec{
-				Endpoints: []*endpoint.Endpoint{{
-					DNSName:    record.Name,
-					RecordType: record.Type,
-					Targets:    []string{record.Target},
-				}},
+			Spec: sequencer.DNSRecordSpec{
+				RecordType: expected.RecordType,
+				Name:       expected.Name,
+				Target:     expected.Target,
+				Properties: expected.Properties,
+				Zone:       workspace.Spec.Networking.DNS.Zone,
 			},
 		}
 
-		for key, value := range record.Properties {
-			ep := dnsEndpoint.Spec.Endpoints[0]
-			ep.ProviderSpecific = append(ep.ProviderSpecific, endpoint.ProviderSpecificProperty{
-				Name:  key,
-				Value: value,
+		if err := r.Create(ctx, record); err != nil {
+			conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
+				Type:   workspaces.DNSCondition,
+				Status: conditions.ConditionError,
+				Reason: err.Error(),
 			})
+
+			return nil, fmt.Errorf("E#3003: Could not create a DNS Record: %w", err)
 		}
 
-		if err := r.Create(ctx, dnsEndpoint); err != nil {
-			return nil, fmt.Errorf("E#3003: Could not create a DNS Endpoint for external-dns: %w", err)
-		}
-
-		createdRecords = true
 	}
 
-	conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 		Type:   workspaces.DNSCondition,
-		Status: conditions.ConditionCreated,
-		Reason: "All DNS Records were created",
+		Status: conditions.ConditionCompleted,
+		Reason: "DNS Hostname configured",
 	})
 
-	if createdRecords {
-		return &ctrl.Result{}, r.Status().Update(ctx, workspace)
-	}
-
-	return nil, r.Status().Update(ctx, workspace)
-}
-
-func (r *DNSReconciler) DNSEndpointExists(ctx context.Context, workspace *sequencer.Workspace, record *workspaces.DNSRecord) (bool, error) {
-	var list endpoint.DNSEndpointList
-	selector, err := labels.Parse(fmt.Sprintf("%s=%s,%s=%s", workspaces.InstanceLabel, workspace.Name, workspaces.DNSLabel, record.Name))
-	if err != nil {
-		return false, fmt.Errorf("E#3001: Failed to parsed the label -- %w", err)
-	}
-
-	err = r.List(ctx, &list, &client.ListOptions{
-		Namespace:     workspace.Namespace,
-		LabelSelector: selector,
-	})
-
-	if err != nil {
-		return false, fmt.Errorf("E#5002: Could not retrieve the list of DNS Endpoints from external-dns -- %w", err)
-	}
-
-	return len(list.Items) > 0, nil
+	return &ctrl.Result{}, r.Status().Update(ctx, workspace)
 }

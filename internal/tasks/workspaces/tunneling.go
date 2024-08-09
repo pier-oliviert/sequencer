@@ -23,7 +23,7 @@ type TunnelingReconciler struct {
 
 func (r *TunnelingReconciler) Reconcile(ctx context.Context, workspace *sequencer.Workspace) (*ctrl.Result, error) {
 	spec := workspace.Spec.Networking
-	condition := conditions.FindStatusCondition(workspace.Status.Conditions, workspaces.TunnelingCondition)
+	condition := conditions.FindCondition(workspace.Status.Conditions, workspaces.TunnelingCondition)
 	if condition == nil {
 		// If the spec doesn't include a Tunnel spec, let's skip this task.
 		if !tunneling.IncludesTunnelSpec(spec) {
@@ -32,7 +32,7 @@ func (r *TunnelingReconciler) Reconcile(ctx context.Context, workspace *sequence
 
 		r.Event(workspace, core.EventTypeNormal, "Conditions", "Initializing a tunnel for workspace")
 
-		conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 			Type:   workspaces.TunnelingCondition,
 			Status: conditions.ConditionInitialized,
 			Reason: "Workspace requires a tunnel",

@@ -22,7 +22,7 @@ type PodReconciler struct {
 }
 
 func (r *PodReconciler) Reconcile(ctx context.Context, build *sequencer.Build) (*ctrl.Result, error) {
-	condition := conditions.FindStatusCondition(build.Status.Conditions, builds.PodScheduledCondition)
+	condition := conditions.FindCondition(build.Status.Conditions, builds.PodScheduledCondition)
 	if condition == nil {
 		condition = &conditions.Condition{
 			Type:   builds.PodScheduledCondition,
@@ -36,7 +36,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, build *sequencer.Build) (
 		return nil, nil
 	}
 
-	conditions.SetStatusCondition(&build.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&build.Status.Conditions, conditions.Condition{
 		Type:   builds.PodScheduledCondition,
 		Status: conditions.ConditionInProgress,
 		Reason: builds.ConditionReasonProcessing,
@@ -70,7 +70,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, build *sequencer.Build) (
 
 	err = r.Create(ctx, pod)
 	if err != nil {
-		conditions.SetStatusCondition(&build.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&build.Status.Conditions, conditions.Condition{
 			Type:   builds.PodScheduledCondition,
 			Status: conditions.ConditionError,
 			Reason: err.Error(),
@@ -83,7 +83,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, build *sequencer.Build) (
 	// not include the state of this condition when deriving the value.
 	build.Status.PodRef = utils.NewReference(pod)
 	build.Status.Phase = builds.PhaseRunning
-	conditions.SetStatusCondition(&build.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&build.Status.Conditions, conditions.Condition{
 		Type:   builds.PodScheduledCondition,
 		Status: conditions.ConditionCompleted,
 		Reason: "Pod created",

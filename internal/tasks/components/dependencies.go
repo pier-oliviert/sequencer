@@ -22,7 +22,7 @@ type DependenciesReconciler struct {
 
 func (r *DependenciesReconciler) Reconcile(ctx context.Context, component *sequencer.Component) (*ctrl.Result, error) {
 	_ = log.FromContext(ctx)
-	condition := conditions.FindStatusCondition(component.Status.Conditions, components.DependenciesCondition)
+	condition := conditions.FindCondition(component.Status.Conditions, components.DependenciesCondition)
 	if condition == nil {
 		condition = &conditions.Condition{
 			Type:   components.DependenciesCondition,
@@ -43,7 +43,7 @@ func (r *DependenciesReconciler) Reconcile(ctx context.Context, component *seque
 }
 
 func (r *DependenciesReconciler) setup(ctx context.Context, component *sequencer.Component) (*ctrl.Result, error) {
-	conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 		Type:   components.DependenciesCondition,
 		Status: conditions.ConditionInProgress,
 		Reason: components.ConditionReasonProcessing,
@@ -55,7 +55,7 @@ func (r *DependenciesReconciler) setup(ctx context.Context, component *sequencer
 
 	// If the component is not part of a workspace, this reconciliation loop can be skipped.
 	if _, ok := component.Labels[workspaces.InstanceLabel]; !ok {
-		conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.DependenciesCondition,
 			Status: conditions.ConditionCompleted,
 			Reason: "Skipped, component is not part of a workspace",
@@ -79,7 +79,7 @@ func (r *DependenciesReconciler) watch(ctx context.Context, component *sequencer
 		Namespace:     component.Namespace,
 	})
 	if err != nil {
-		conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.DependenciesCondition,
 			Status: conditions.ConditionError,
 			Reason: "Error loading dependencies",
@@ -88,7 +88,7 @@ func (r *DependenciesReconciler) watch(ctx context.Context, component *sequencer
 		return nil, r.Status().Update(ctx, component)
 	}
 
-	conditions.SetStatusCondition(&component.Status.Conditions, r.conditionForDependency(list.Items, component))
+	conditions.SetCondition(&component.Status.Conditions, r.conditionForDependency(list.Items, component))
 
 	return &ctrl.Result{}, r.Status().Update(ctx, component)
 }
@@ -104,7 +104,7 @@ Chain:
 	for _, component := range deps {
 		for _, dep := range self.Spec.DependsOn {
 			if dep.ComponentName == component.Spec.Name {
-				c := conditions.FindStatusCondition(component.Status.Conditions, dep.ConditionType)
+				c := conditions.FindCondition(component.Status.Conditions, dep.ConditionType)
 				if c == nil || c.Status != dep.ConditionStatus {
 					condition.Status = conditions.ConditionWaiting
 					condition.Reason = fmt.Sprintf("Waiting on %s's Condition to be %s:%s", component.Name, dep.ConditionType, dep.ConditionStatus)

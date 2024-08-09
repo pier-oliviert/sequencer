@@ -21,7 +21,7 @@ type NetworkReconciler struct {
 }
 
 func (n *NetworkReconciler) Reconcile(ctx context.Context, component *sequencer.Component) (*ctrl.Result, error) {
-	condition := conditions.FindStatusCondition(component.Status.Conditions, components.NetworkCondition)
+	condition := conditions.FindCondition(component.Status.Conditions, components.NetworkCondition)
 	if condition == nil {
 		condition = &conditions.Condition{
 			Type:   components.NetworkCondition,
@@ -35,7 +35,7 @@ func (n *NetworkReconciler) Reconcile(ctx context.Context, component *sequencer.
 		return nil, nil
 	}
 
-	conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 		Type:   components.NetworkCondition,
 		Status: conditions.ConditionInProgress,
 		Reason: components.ConditionReasonProcessing,
@@ -78,7 +78,7 @@ func (n *NetworkReconciler) Reconcile(ctx context.Context, component *sequencer.
 		}
 	}
 
-	conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 		Type:   components.NetworkCondition,
 		Status: conditions.ConditionCompleted,
 		Reason: components.ConditionReasonCompleted,

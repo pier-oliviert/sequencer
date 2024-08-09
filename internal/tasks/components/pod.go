@@ -23,7 +23,7 @@ type PodReconciler struct {
 }
 
 func (p *PodReconciler) Reconcile(ctx context.Context, component *sequencer.Component) (*ctrl.Result, error) {
-	condition := conditions.FindStatusCondition(component.Status.Conditions, components.PodCondition)
+	condition := conditions.FindCondition(component.Status.Conditions, components.PodCondition)
 	if condition == nil {
 		condition = &conditions.Condition{
 			Type:   components.PodCondition,
@@ -35,7 +35,7 @@ func (p *PodReconciler) Reconcile(ctx context.Context, component *sequencer.Comp
 	if condition.Status == conditions.ConditionHealthy {
 		err := p.monitorPod(ctx, component)
 		if err != nil {
-			conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+			conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 				Type:   components.PodCondition,
 				Status: conditions.ConditionError,
 				Reason: "Pod became unhealthy",
@@ -49,7 +49,7 @@ func (p *PodReconciler) Reconcile(ctx context.Context, component *sequencer.Comp
 		return nil, nil
 	}
 
-	conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 		Type:   components.PodCondition,
 		Status: conditions.ConditionInProgress,
 		Reason: components.ConditionReasonProcessing,
@@ -60,7 +60,7 @@ func (p *PodReconciler) Reconcile(ctx context.Context, component *sequencer.Comp
 
 	if err := p.deployPod(ctx, component); err != nil {
 		p.EventRecorder.Event(component, "Warning", string(components.PodCondition), err.Error())
-		conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.PodCondition,
 			Status: conditions.ConditionError,
 			Reason: "Pod deployment failed",
@@ -69,7 +69,7 @@ func (p *PodReconciler) Reconcile(ctx context.Context, component *sequencer.Comp
 		return nil, err
 	}
 
-	conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 		Type:   components.PodCondition,
 		Status: conditions.ConditionHealthy,
 		Reason: components.ConditionReasonCompleted,
@@ -114,7 +114,7 @@ func (p *PodReconciler) deployPod(ctx context.Context, component *sequencer.Comp
 	}
 
 	// Pod is created and as far as this reconciler loop is concerned, we're done.
-	conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 		Type:   components.PodCondition,
 		Status: conditions.ConditionHealthy,
 		Reason: "Pod is deployed",

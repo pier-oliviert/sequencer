@@ -8,6 +8,7 @@ import (
 	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
 	"github.com/pier-oliviert/sequencer/api/v1alpha1/components"
 	"github.com/pier-oliviert/sequencer/api/v1alpha1/conditions"
+	"github.com/pier-oliviert/sequencer/api/v1alpha1/utils"
 	"github.com/pier-oliviert/sequencer/api/v1alpha1/workspaces"
 	core "k8s.io/api/core/v1"
 	networking "k8s.io/api/networking/v1"
@@ -34,13 +35,13 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 
 	logger := log.FromContext(ctx)
 
-	condition := conditions.FindStatusCondition(workspace.Status.Conditions, workspaces.IngressCondition)
+	condition := conditions.FindCondition(workspace.Status.Conditions, workspaces.IngressCondition)
 
 	if condition == nil {
 		logger.Info("Workspace has an ingress defined. Initializing condition")
 		i.Event(workspace, core.EventTypeNormal, "Conditions", "Initializing Ingress for workspace")
 
-		conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 			Type:   workspaces.IngressCondition,
 			Status: conditions.ConditionInitialized,
 			Reason: "Workspace requires an Ingress",
@@ -49,10 +50,33 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 		return &ctrl.Result{}, i.Status().Update(ctx, workspace)
 	}
 
-	// Only allow these conditions
+	// There's only a subset of condition status that this task reconciler can handle. Any others means there's
+	// nothing to do here
 	if !(condition.Status == conditions.ConditionInitialized || condition.Status == conditions.ConditionWaiting) {
 		return nil, nil
 	}
+
+	// Ingresses requires two DNSRecord to work properly. A top-level DNS record that can be used
+	// by the application as the primary point. The other is a wildcard DNS record for any subdomain that the
+	// application might need.
+
+	loadBalancerSvc, err := i.getLoadBalancer(ctx, workspace.Spec.Networking.Ingress.LoadBalancerRef)
+	if err != nil {
+		return nil, fmt.Errorf("E#3013: Could not find load balancer with Reference: %s -- %w", workspace.Spec.Networking.Ingress.LoadBalancerRef.String(), err)
+	}
+
+	ingressHostname := loadBalancerSvc.Status.LoadBalancer.Ingress[0].Hostname
+	hostname := fmt.Sprintf("%s.%s", workspace.Name, workspace.Spec.Networking.DNS.Zone)
+
+	workspace.Status.DNS = append(workspace.Status.DNS, workspaces.DNS{
+		RecordType: "A",
+		Name:       hostname,
+		Target:     ingressHostname,
+	}, workspaces.DNS{
+		RecordType: "A",
+		Name:       fmt.Sprintf("*.%s", hostname),
+		Target:     ingressHostname,
+	})
 
 	spec := workspace.Spec.Networking.Ingress
 
@@ -60,7 +84,7 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 	if errors.Is(err, ErrServiceNotYetReady) {
 		i.EventRecorder.Event(workspace, core.EventTypeNormal, string(workspaces.IngressCondition), "Waiting for components to be ready")
 		if condition.Status != conditions.ConditionWaiting {
-			conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+			conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 				Type:   workspaces.IngressCondition,
 				Status: conditions.ConditionWaiting,
 				Reason: "Waiting on component to be ready",
@@ -73,7 +97,7 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 
 	// Future-proofing for when findServices can return a different error
 	if err != nil {
-		conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 			Type:   workspaces.IngressCondition,
 			Status: conditions.ConditionError,
 			Reason: err.Error(),
@@ -82,7 +106,7 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 	}
 
 	i.EventRecorder.Event(workspace, core.EventTypeNormal, string(workspaces.IngressCondition), "Networks configured, creating the ingress")
-	conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 		Type:   workspaces.IngressCondition,
 		Status: conditions.ConditionLocked,
 		Reason: "Locked to create resources",
@@ -116,17 +140,17 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 			IngressClassName: spec.ClassName,
 			TLS: []networking.IngressTLS{{
 				Hosts: []string{
-					workspace.Status.DNS.Hostname,
-					fmt.Sprintf("*.%s", workspace.Status.DNS.Hostname),
+					workspace.Status.Host,
+					fmt.Sprintf("*.%s", workspace.Status.Host),
 				},
 				SecretName: fmt.Sprintf("%s-tls", workspace.Name),
 			}},
 		},
 	}
 
-	ingress.Spec.Rules = i.ingressRules(spec.Rules, services, workspace.Status.DNS.Hostname)
+	ingress.Spec.Rules = i.ingressRules(spec.Rules, services, workspace.Status.Host)
 	if err := i.Create(ctx, &ingress); err != nil {
-		conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 			Type:   workspaces.IngressCondition,
 			Status: conditions.ConditionError,
 			Reason: err.Error(),
@@ -135,7 +159,7 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 		return nil, err
 	}
 
-	conditions.SetStatusCondition(&workspace.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 		Type:   workspaces.IngressCondition,
 		Status: conditions.ConditionCompleted,
 		Reason: "Ingress is created",
@@ -154,33 +178,36 @@ func (i *IngressReconciler) ingressRules(specs []workspaces.RuleSpec, services [
 		if spec.Subdomain != nil {
 			rule.Host = fmt.Sprintf("%s.%s", *spec.Subdomain, hostname)
 		}
+		path := networking.HTTPIngressPath{
+			PathType: new(networking.PathType),
+		}
 
 		if spec.Path != nil {
-			path := networking.HTTPIngressPath{
-				Path:     *spec.Path,
-				PathType: new(networking.PathType),
-			}
+			path.Path = *spec.Path
 			*path.PathType = networking.PathTypePrefix
+		} else {
+			path.Path = "/"
+			*path.PathType = networking.PathTypePrefix
+		}
 
-			// The services were already checked to see if they match the rule spec, for this reason, there's no error here as
-			// the service will exist. However, the indirection of this methoid and availableServices isn't really great for readability and maintenance.
-			// It's expected this will be refactored to be easier to reason about.
-			for _, s := range services {
-				if s.Labels[components.NameLabel] == spec.ComponentName && s.Labels[components.NetworkLabel] == spec.NetworkName {
-					path.Backend = networking.IngressBackend{
-						Service: &networking.IngressServiceBackend{
-							Name: s.Name,
-							Port: networking.ServiceBackendPort{
-								Number: s.Spec.Ports[0].Port,
-							},
+		// The services were already checked to see if they match the rule spec, for this reason, there's no error here as
+		// the service will exist. However, the indirection of this methoid and availableServices isn't really great for readability and maintenance.
+		// It's expected this will be refactored to be easier to reason about.
+		for _, s := range services {
+			if s.Labels[components.NameLabel] == spec.ComponentName && s.Labels[components.NetworkLabel] == spec.NetworkName {
+				path.Backend = networking.IngressBackend{
+					Service: &networking.IngressServiceBackend{
+						Name: s.Name,
+						Port: networking.ServiceBackendPort{
+							Number: s.Spec.Ports[0].Port,
 						},
-					}
+					},
 				}
 			}
+		}
 
-			rule.HTTP = &networking.HTTPIngressRuleValue{
-				Paths: []networking.HTTPIngressPath{path},
-			}
+		rule.HTTP = &networking.HTTPIngressRuleValue{
+			Paths: []networking.HTTPIngressPath{path},
 		}
 
 		rules = append(rules, rule)
@@ -225,4 +252,19 @@ func (i *IngressReconciler) findServices(ctx context.Context, workspace *sequenc
 	}
 
 	return services, err
+}
+
+// Retrieves the Service using the passed reference. The Service needs to be of type `LoadBalancer`. Returns
+// the service found if it is the proper type. Otherwise, it will return a contextualized error.
+func (i *IngressReconciler) getLoadBalancer(ctx context.Context, ref utils.Reference) (*core.Service, error) {
+	var service core.Service
+	if err := i.Client.Get(ctx, ref.NamespacedName(), &service); err != nil {
+		return nil, err
+	}
+
+	if service.Spec.Type != core.ServiceTypeLoadBalancer {
+		return nil, fmt.Errorf("expected service to be of type LoadBalancer, got %s", service.Spec.Type)
+	}
+
+	return &service, i.Client.Get(ctx, ref.NamespacedName(), &service)
 }

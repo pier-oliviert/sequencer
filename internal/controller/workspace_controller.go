@@ -52,8 +52,7 @@ type WorkspaceReconciler struct {
 //+kubebuilder:rbac:groups=se.quencer.io,resources=workspaces/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 //+kubebuilder:rbac:groups="networking.k8s.io",resources=ingresses,verbs=get;watch;list;create;delete
-//+kubebuilder:rbac:groups="externaldns.k8s.io",resources=dnsendpoints,verbs=watch;get;list;create;delete
-//+kubebuilder:rbac:groups="se.quencer.io",resources=dnsendpoints,verbs=watch;get;list;create;delete
+//+kubebuilder:rbac:groups="se.quencer.io",resources=dnsrecords,verbs=watch;get;list;create;delete
 
 func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var workspace sequencer.Workspace
@@ -80,31 +79,13 @@ func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
-	if result, err := (&tasks.DNSReconciler{
-		Client:        r.Client,
-		EventRecorder: r.EventRecorder,
-	}).Reconcile(ctx, &workspace); err != nil {
-		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("DNS->%w", err))
-	} else if result != nil {
-		return *result, nil
-	}
-
 	if result, err := (&tasks.TunnelingReconciler{
 		Client:        r.Client,
 		EventRecorder: r.EventRecorder,
 	}).Reconcile(ctx, &workspace); err != nil {
 		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("Tunneling->%w", err))
 	} else if result != nil {
-		return *result, nil
-	}
-
-	if result, err := (&tasks.ComponentsReconciler{
-		Client:        r.Client,
-		EventRecorder: r.EventRecorder,
-	}).Reconcile(ctx, &workspace); err != nil {
-		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("Components->%w", err))
-	} else if result != nil {
-		return *result, nil
+		return *result, r.Status().Update(ctx, &workspace)
 	}
 
 	if result, err := (&tasks.IngressReconciler{
@@ -113,7 +94,25 @@ func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}).Reconcile(ctx, &workspace); err != nil {
 		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("Ingress->%w", err))
 	} else if result != nil {
-		return *result, nil
+		return *result, r.Status().Update(ctx, &workspace)
+	}
+
+	if result, err := (&tasks.DNSReconciler{
+		Client:        r.Client,
+		EventRecorder: r.EventRecorder,
+	}).Reconcile(ctx, &workspace); err != nil {
+		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("DNS->%w", err))
+	} else if result != nil {
+		return *result, r.Status().Update(ctx, &workspace)
+	}
+
+	if result, err := (&tasks.ComponentsReconciler{
+		Client:        r.Client,
+		EventRecorder: r.EventRecorder,
+	}).Reconcile(ctx, &workspace); err != nil {
+		return r.workspaceFailed(ctx, ctrl.Result{}, &workspace, fmt.Errorf("Components->%w", err))
+	} else if result != nil {
+		return *result, r.Status().Update(ctx, &workspace)
 	}
 
 	return ctrl.Result{}, nil
@@ -125,23 +124,27 @@ func (r *WorkspaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&sequencer.Workspace{}).
 		Watches(
 			&sequencer.Component{},
-			handler.EnqueueRequestsFromMapFunc(r.reconcileForComponentFunc),
+			handler.EnqueueRequestsFromMapFunc(r.handleFuncForLinkedResource),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
+		).
+		Watches(
+			&sequencer.DNSRecord{},
+			handler.EnqueueRequestsFromMapFunc(r.handleFuncForLinkedResource),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
 		).
 		Complete(r)
 }
 
-func (r *WorkspaceReconciler) reconcileForComponentFunc(ctx context.Context, obj client.Object) []reconcile.Request {
+func (r *WorkspaceReconciler) handleFuncForLinkedResource(ctx context.Context, obj client.Object) []reconcile.Request {
 	requests := []reconcile.Request{}
-	component := obj.(*sequencer.Component)
 
-	if label, ok := component.Labels[workspaces.InstanceLabel]; !ok {
+	if label, ok := obj.GetLabels()[workspaces.InstanceLabel]; !ok {
 		return requests
 	} else {
 		requests = append(requests, reconcile.Request{
 			NamespacedName: types.NamespacedName{
 				Name:      label,
-				Namespace: component.Namespace,
+				Namespace: obj.GetNamespace(),
 			},
 		})
 	}

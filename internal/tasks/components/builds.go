@@ -22,7 +22,7 @@ type BuildReconciler struct {
 }
 
 func (r *BuildReconciler) Reconcile(ctx context.Context, component *sequencer.Component) (*ctrl.Result, error) {
-	condition := conditions.FindStatusCondition(component.Status.Conditions, components.BuildCondition)
+	condition := conditions.FindCondition(component.Status.Conditions, components.BuildCondition)
 	if condition == nil {
 		condition = &conditions.Condition{
 			Type:   components.BuildCondition,
@@ -45,7 +45,7 @@ func (r *BuildReconciler) Reconcile(ctx context.Context, component *sequencer.Co
 }
 
 func (r *BuildReconciler) launchBuild(ctx context.Context, component *sequencer.Component) (*ctrl.Result, error) {
-	conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+	conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 		Type:   components.BuildCondition,
 		Status: conditions.ConditionInProgress,
 		Reason: components.ConditionReasonProcessing,
@@ -57,7 +57,7 @@ func (r *BuildReconciler) launchBuild(ctx context.Context, component *sequencer.
 	// It's possible a component doesn't have a build and only uses an existing image, if that's the case,
 	// we'll skip the build process
 	if component.Spec.Build == nil {
-		conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.BuildCondition,
 			Status: conditions.ConditionCompleted,
 			Reason: components.ConditionReasonSkipped,
@@ -87,7 +87,7 @@ func (r *BuildReconciler) launchBuild(ctx context.Context, component *sequencer.
 	}
 
 	if err := r.Client.Create(ctx, &build); err != nil {
-		conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.BuildCondition,
 			Status: conditions.ConditionError,
 			Reason: err.Error(),
@@ -114,7 +114,7 @@ func (r *BuildReconciler) monitorBuild(ctx context.Context, component *sequencer
 	// Reaching here means there's a Build resource already dispatched and we're monitoring the state of the build
 	var build sequencer.Build
 	if err := r.Client.Get(ctx, component.Status.BuildRefs[0].NamespacedName(), &build); err != nil {
-		conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.BuildCondition,
 			Status: conditions.ConditionError,
 			Reason: err.Error(),
@@ -125,7 +125,7 @@ func (r *BuildReconciler) monitorBuild(ctx context.Context, component *sequencer
 
 	switch build.Status.Phase {
 	case builds.PhaseSuccess:
-		conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.BuildCondition,
 			Status: conditions.ConditionCompleted,
 			Reason: components.ConditionReasonSuccessful,
@@ -134,7 +134,7 @@ func (r *BuildReconciler) monitorBuild(ctx context.Context, component *sequencer
 		return &ctrl.Result{}, r.Client.Status().Update(ctx, component)
 
 	case builds.PhaseError:
-		conditions.SetStatusCondition(&component.Status.Conditions, conditions.Condition{
+		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.BuildCondition,
 			Status: conditions.ConditionError,
 			Reason: "Build had a failure",
