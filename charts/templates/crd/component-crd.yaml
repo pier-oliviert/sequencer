@@ -3,8 +3,6 @@ kind: CustomResourceDefinition
 metadata:
   name: components.se.quencer.io
   annotations:
-    cert-manager.io/inject-ca-from: '{{ .Release.Namespace }}/{{ include "operator.fullname"
-      . }}-CERTIFICATE_NAMESPACE/CERTIFICATE_NAME'
     controller-gen.kubebuilder.io/version: v0.14.0
   labels:
   {{- include "operator.labels" . | nindent 4 }}

@@ -48,6 +48,7 @@ spec:
         - configMapRef:
             name: {{ include "operator.fullname" . }}-controller-manager
         image: {{ quote .Values.controllerManager.manager.image }}
+        imagePullPolicy: {{ .Values.controllerManager.pullPolicy }}
         livenessProbe:
           httpGet:
             path: /healthz

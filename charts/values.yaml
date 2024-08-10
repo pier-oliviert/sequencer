@@ -30,6 +30,7 @@ controllerManager:
         drop:
         - ALL
     image: pothibo/sequencer-operator:v0.2
+    pullPolicy: IfNotPresent
     resources:
       limits:
         cpu: 500m
@@ -61,7 +62,7 @@ certManager:
   serviceAccount:
     name: cert-manager
     namespace: cert-manager
-  server: https://acme-staging-v02.api.letsencrypt.org/directory
+  server: https://acme-v02.api.letsencrypt.org/directory
   email: your@email.com
   privateKeySecretRef:
     name: acme-cert-tls
@@ -77,62 +78,5 @@ solver:
     tag: v0.2
   pullPolicy: Never
 
-externalDNS:
-  replicaCount: 1
-  image:
-    repository: pothibo/external-dns
-    tag: v0.14.2
-    pullPolicy: IfNotPresent
-  podSecurityContext:
-    runAsNonRoot: true
-    fsGroup: 65534
-    seccompProfile:
-      type: RuntimeDefault
-  securityContext:
-    privileged: false
-    allowPrivilegeEscalation: false
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 65532
-    runAsGroup: 65532
-    capabilities:
-      drop: ["ALL"]
-  log:
-    level: info
-    format: text
-  interval: 10s
-  policy: sync
-  registry: crd
-  sources:
-    - service
-    - ingress
-    - crd
-  recordTypes:
-    - A
-    - AAAA
-    - CNAME
-    - TXT
-  livenessProbe:
-    httpGet:
-      path: /healthz
-      port: http
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 2
-    successThreshold: 1
-  readinessProbe:
-    httpGet:
-      path: /healthz
-      port: http
-    initialDelaySeconds: 5
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 6
-    successThreshold: 1
-  resources: {}
-  nodeSelector: {}
-  affinity: {}
-  tolerations: []
-  provider:
-    name: cloudflare
+dnsController:
+  image: sequencer-dns:dev
