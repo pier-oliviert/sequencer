@@ -21,7 +21,7 @@ distribution:
         cpu: 400m
         memory: 2Gi
 
-sequencer:
+sequencerController:
   manager:
     args:
     - --leader-elect

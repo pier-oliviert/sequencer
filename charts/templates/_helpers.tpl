@@ -36,14 +36,3 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: {{ include "operator.name" . }}
 {{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "operator.serviceAccountName" -}}
-{{- if .Values.serviceAccount }}
-{{- default (include "operator.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- include "operator.fullname" . }}-controller-manager
-{{- end }}
-{{- end }}

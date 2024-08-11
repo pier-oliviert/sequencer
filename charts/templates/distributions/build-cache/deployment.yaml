@@ -44,7 +44,7 @@ spec:
           name: certs
         - mountPath: /etc/docker/registry
           name: distribution-config
-      serviceAccountName: {{ include "operator.serviceAccountName" . }}
+      serviceAccountName: {{ include "operator.fullname" . }}-controller
       terminationGracePeriodSeconds: 10
       volumes:
       - emptyDir:
