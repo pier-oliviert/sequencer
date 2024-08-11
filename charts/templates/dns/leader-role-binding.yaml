@@ -4,11 +4,11 @@ metadata:
   labels:
     app.kubernetes.io/name: dns-sequencer
     {{- include "operator.labels" . | nindent 4 }}
-  name: {{ template "operator.labels" . }}:dns-leader
+  name: {{ include "operator.fullname" . }}:dns-leader
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ template "operator.labels" . }}:dns-leader
+  name: {{ include "operator.fullname" . }}:dns-leader
 subjects:
 - kind: ServiceAccount
   name: {{ include "operator.fullname" . }}-dns-controller

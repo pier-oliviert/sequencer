@@ -8,7 +8,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ template "operator.fullname" . }}:dns-controller
+  name: {{ include "operator.fullname" . }}:dns-controller
 subjects:
   - kind: ServiceAccount
     name: {{ include "operator.fullname" . }}-dns-controller
