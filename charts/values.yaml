@@ -20,7 +20,8 @@ distribution:
       requests:
         cpu: 400m
         memory: 2Gi
-controllerManager:
+
+sequencer:
   manager:
     args:
     - --leader-elect

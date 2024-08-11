@@ -47,18 +47,3 @@ Create the name of the service account to use
 {{- include "operator.fullname" . }}-controller-manager
 {{- end }}
 {{- end }}
-
-{{- define "operator.externalDNS.image" -}}
-{{- printf "%s:%s" .Values.externalDNS.image.repository (default (printf "v%s" .Chart.AppVersion) .Values.externalDNS.image.tag) }}
-{{- end }}
-
-{{/*
-Provider name, Keeps backward compatibility on provider
-*/}}
-{{- define "operator.externalDNS.providerName" -}}
-{{- if eq (typeOf .Values.externalDNS.provider) "string" }}
-{{- .Values.externalDNS.provider }}
-{{- else }}
-{{- .Values.externalDNS.provider.name }}
-{{- end }}
-{{- end }}
