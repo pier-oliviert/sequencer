@@ -81,3 +81,5 @@ solver:
 
 dnsController:
   image: sequencer-dns:dev
+  providerName: undefined
+  env: []
