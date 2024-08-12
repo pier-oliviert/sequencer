@@ -57,7 +57,7 @@ type WorkspaceReconciler struct {
 func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var workspace sequencer.Workspace
 
-	if err := r.Client.Get(ctx, req.NamespacedName, &workspace); err != nil {
+	if err := r.Get(ctx, req.NamespacedName, &workspace); err != nil {
 		if k8sErrors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
@@ -69,7 +69,7 @@ func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, r.Status().Update(ctx, &workspace)
 	}
 
-	if !workspace.ObjectMeta.DeletionTimestamp.IsZero() && workspace.Status.Phase != workspaces.PhaseTerminating {
+	if !workspace.DeletionTimestamp.IsZero() && workspace.Status.Phase != workspaces.PhaseTerminating {
 		workspace.Status.Phase = workspaces.PhaseTerminating
 		r.Eventf(&workspace, core.EventTypeNormal, string(workspaces.PhaseTerminating), "Waiting for external dependencies to be cleaned up")
 		return ctrl.Result{}, r.Status().Update(ctx, &workspace)
