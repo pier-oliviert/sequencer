@@ -11,6 +11,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // ProviderController is the interface that will be passed to a 3rd party provider
@@ -140,12 +141,16 @@ func (c *controller) UpdateCondition(ctx context.Context, status conditions.Cond
 }
 
 func (c *controller) Guard(ctx context.Context, reason string, task Task) error {
+	logger := log.FromContext(ctx)
 	if err := c.UpdateCondition(ctx, conditions.ConditionLocked, reason); err != nil {
 		return err
 	}
 
 	status, reason, err := task()
 	if err != nil {
+		if updateErr := c.UpdateCondition(ctx, conditions.ConditionError, err.Error()); updateErr != nil {
+			logger.Error(updateErr, "E#TODO: Could not unloack the condition")
+		}
 		return err
 	}
 

@@ -152,14 +152,13 @@ func (c cf) Terminate(ctx context.Context) (_ *ctrl.Result, err error) {
 
 	logger := log.FromContext(ctx)
 	workspace := c.Workspace()
-	providerMeta := workspace.Status.Tunnel.ProviderMeta
-	if providerMeta == nil {
+	if workspace.Status.Tunnel == nil {
 		return nil, c.RemoveFinalizer(ctx, kCloudflareTunnelFinalizer)
 	}
 
 	// Need to tear down the connector first as the Tunnel cannot be deleted with an active connection.
 	var pods core.PodList
-	selector, err := labels.Parse(fmt.Sprintf("%s=%s,%s=%s", workspaces.InstanceLabel, workspace.Name, kCloudflareConnectorLabel, providerMeta[kCloudflareConnectorLabel]))
+	selector, err := labels.Parse(fmt.Sprintf("%s=%s,%s=%s", workspaces.InstanceLabel, workspace.Name, kCloudflareConnectorLabel, workspace.Status.Tunnel.ProviderMeta[kCloudflareConnectorLabel]))
 	if err != nil {
 		return nil, err
 	}
@@ -191,10 +190,11 @@ func (c cf) Terminate(ctx context.Context) (_ *ctrl.Result, err error) {
 	}
 
 	return nil, c.Guard(ctx, "Deleting tunnel on Cloudflare", func() (status conditions.ConditionStatus, reason string, err error) {
-		err = c.api.DeleteTunnel(ctx, cloudflare.AccountIdentifier(c.accountID), providerMeta[kCloudflareTunnelIDKey])
+		tunnelID := workspace.Status.Tunnel.RemoteID
+		err = c.api.DeleteTunnel(ctx, cloudflare.AccountIdentifier(c.accountID), tunnelID)
 		if err != nil {
-			logger.Error(err, "E#3009: Could not delete the Tunnel", "ID", providerMeta[kCloudflareTunnelIDKey])
-			c.Eventf(core.EventTypeWarning, string(c.Condition().Type), "E#3009: Could not delete the Tunnel (ID: %s) -- %s", providerMeta[kCloudflareTunnelIDKey], err.Error())
+			logger.Error(err, "E#3009: Could not delete the Tunnel", "ID", tunnelID)
+			c.Eventf(core.EventTypeWarning, string(c.Condition().Type), "E#3009: Could not delete the Tunnel (ID: %s) -- %s", tunnelID, err.Error())
 			return "", "", err
 		}
 
