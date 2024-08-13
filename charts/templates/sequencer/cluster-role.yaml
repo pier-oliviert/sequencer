@@ -36,16 +36,6 @@ rules:
   - list
   - watch
 - apiGroups:
-  - externaldns.k8s.io
-  resources:
-  - dnsendpoints
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - watch
-- apiGroups:
   - networking.k8s.io
   resources:
   - ingresses
@@ -59,55 +49,8 @@ rules:
   - se.quencer.io
   resources:
   - builds
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - watch
-- apiGroups:
-  - se.quencer.io
-  resources:
-  - builds/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - se.quencer.io
-  resources:
-  - builds/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - se.quencer.io
-  resources:
+  - dnsrecords
   - components
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - se.quencer.io
-  resources:
-  - components/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - se.quencer.io
-  resources:
-  - components/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - se.quencer.io
-  resources:
   - workspaces
   verbs:
   - create
@@ -120,21 +63,19 @@ rules:
 - apiGroups:
   - se.quencer.io
   resources:
-  - workspaces/conditions
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - se.quencer.io
-  resources:
   - workspaces/finalizers
+  - dnsrecords/finalizers
+  - builds/finalizers
+  - components/finalizers
   verbs:
   - update
 - apiGroups:
   - se.quencer.io
   resources:
   - workspaces/status
+  - dnsrecords/status
+  - builds/status
+  - components/status
   verbs:
   - get
   - patch
