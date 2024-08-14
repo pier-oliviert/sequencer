@@ -31,7 +31,7 @@ func (r *ComponentsReconciler) ReconcileComponentHealth(ctx context.Context, wor
 
 	// Let's load all the components for this
 	var list sequencer.ComponentList
-	err = r.Client.List(ctx, &list, &client.ListOptions{
+	err = r.List(ctx, &list, &client.ListOptions{
 		LabelSelector: selector,
 		Namespace:     workspace.Namespace,
 	})
@@ -49,14 +49,15 @@ func (r *ComponentsReconciler) ReconcileComponentHealth(ctx context.Context, wor
 		}
 
 		if component.Status.Phase == components.PhaseError {
+			errCondition := conditions.FindStatusCondition(component.Status.Conditions, conditions.ConditionError)
 			conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 				Type:   workspaces.ComponentCondition,
 				Status: conditions.ConditionError,
-				Reason: fmt.Sprintf("Error in component (%s)", component.Name),
+				Reason: fmt.Sprintf("Component: (%s), Error: %s", component.Name, errCondition.Reason),
 			})
 			workspace.Status.Phase = workspaces.PhaseError
 
-			r.Eventf(workspace, core.EventTypeWarning, "Components", "Component (%s) has failed", component.Name)
+			r.Eventf(workspace, core.EventTypeWarning, "Components", "Component (%s) has failed: %s", component.Name, errCondition.Reason)
 
 			return &ctrl.Result{}, r.Status().Update(ctx, workspace)
 		}

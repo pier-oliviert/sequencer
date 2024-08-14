@@ -54,7 +54,13 @@ func (r *PodReconciler) Reconcile(ctx context.Context, build *sequencer.Build) (
 	container := specs.BuilderContainerFor(build)
 	volumes, err := specs.VolumesForContainer(&container, build)
 	if err != nil {
-		return &ctrl.Result{}, err
+		conditions.SetCondition(&build.Status.Conditions, conditions.Condition{
+			Type:   builds.PodScheduledCondition,
+			Status: conditions.ConditionError,
+			Reason: err.Error(),
+		})
+
+		return &ctrl.Result{}, r.Status().Update(ctx, build)
 	}
 
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
@@ -62,7 +68,13 @@ func (r *PodReconciler) Reconcile(ctx context.Context, build *sequencer.Build) (
 
 	volumes, mounts, err := r.configureContainerForCredentials(ctx, build)
 	if err != nil {
-		return nil, err
+		conditions.SetCondition(&build.Status.Conditions, conditions.Condition{
+			Type:   builds.PodScheduledCondition,
+			Status: conditions.ConditionError,
+			Reason: err.Error(),
+		})
+
+		return &ctrl.Result{}, r.Status().Update(ctx, build)
 	}
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
 	container.VolumeMounts = append(container.VolumeMounts, mounts...)

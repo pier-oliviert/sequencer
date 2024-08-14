@@ -82,7 +82,7 @@ func (r *BuildReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		Client:        r.Client,
 		EventRecorder: r.EventRecorder,
 	}).Reconcile(ctx, &build); err != nil {
-		return r.buildFailed(ctx, ctrl.Result{}, &build, fmt.Errorf("pod failed: %w", err))
+		return r.buildFailed(ctx, ctrl.Result{}, &build, err)
 	} else if result != nil {
 		return *result, nil
 	}
@@ -157,7 +157,7 @@ func (r *BuildReconciler) buildFailed(ctx context.Context, result ctrl.Result, b
 		return result, nil
 	}
 
-	r.EventRecorder.Event(build, "Warning", string(builds.PhaseError), err.Error())
+	r.Event(build, "Warning", string(builds.PhaseError), err.Error())
 	build.Status.Phase = builds.PhaseError
 	return result, r.Status().Update(ctx, build)
 }

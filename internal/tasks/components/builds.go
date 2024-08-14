@@ -50,7 +50,7 @@ func (r *BuildReconciler) launchBuild(ctx context.Context, component *sequencer.
 		Status: conditions.ConditionInProgress,
 		Reason: components.ConditionReasonProcessing,
 	})
-	if err := r.Client.Status().Update(ctx, component); err != nil {
+	if err := r.Status().Update(ctx, component); err != nil {
 		return nil, err
 	}
 
@@ -86,21 +86,21 @@ func (r *BuildReconciler) launchBuild(ctx context.Context, component *sequencer.
 		Spec: *component.Spec.Build,
 	}
 
-	if err := r.Client.Create(ctx, &build); err != nil {
+	if err := r.Create(ctx, &build); err != nil {
 		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.BuildCondition,
 			Status: conditions.ConditionError,
 			Reason: err.Error(),
 		})
 
-		if err := r.Client.Status().Update(ctx, component); err != nil {
+		if err := r.Status().Update(ctx, component); err != nil {
 			return &ctrl.Result{}, err
 		}
 
 		return nil, err
 	}
 
-	r.EventRecorder.Eventf(component, core.EventTypeNormal, string(components.BuildCondition), "Dispatched builder (%s)", build.Name)
+	r.Eventf(component, core.EventTypeNormal, string(components.BuildCondition), "Dispatched builder (%s)", build.Name)
 	component.Status.BuildRefs = append(component.Status.BuildRefs, *utils.NewReference(&build))
 	return &ctrl.Result{}, r.Client.Status().Update(ctx, component)
 }
@@ -113,14 +113,14 @@ func (r *BuildReconciler) monitorBuild(ctx context.Context, component *sequencer
 
 	// Reaching here means there's a Build resource already dispatched and we're monitoring the state of the build
 	var build sequencer.Build
-	if err := r.Client.Get(ctx, component.Status.BuildRefs[0].NamespacedName(), &build); err != nil {
+	if err := r.Get(ctx, component.Status.BuildRefs[0].NamespacedName(), &build); err != nil {
 		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.BuildCondition,
 			Status: conditions.ConditionError,
 			Reason: err.Error(),
 		})
 
-		return &ctrl.Result{}, r.Client.Status().Update(ctx, component)
+		return &ctrl.Result{}, r.Status().Update(ctx, component)
 	}
 
 	switch build.Status.Phase {
@@ -131,16 +131,18 @@ func (r *BuildReconciler) monitorBuild(ctx context.Context, component *sequencer
 			Reason: components.ConditionReasonSuccessful,
 		})
 
-		return &ctrl.Result{}, r.Client.Status().Update(ctx, component)
+		return &ctrl.Result{}, r.Status().Update(ctx, component)
 
 	case builds.PhaseError:
+		condition := conditions.FindStatusCondition(build.Status.Conditions, conditions.ConditionError)
+
 		conditions.SetCondition(&component.Status.Conditions, conditions.Condition{
 			Type:   components.BuildCondition,
 			Status: conditions.ConditionError,
-			Reason: "Build had a failure",
+			Reason: condition.Reason,
 		})
 
-		if err := r.Client.Status().Update(ctx, component); err != nil {
+		if err := r.Status().Update(ctx, component); err != nil {
 			return nil, err
 		}
 
