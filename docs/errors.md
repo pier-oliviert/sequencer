@@ -67,9 +67,10 @@ Workspace errors are top level errors that aren't specific to any of the underly
 
 
 ## System Errors
-These errors most likely happened outside the operator's scope. Examples of a system error would be a Kubernetes' node error, someone manually deleting watched resources through `kubectl`, etc. It's still useful to have those listed here as that might give an insight to the user as to what has caused the issue.
+Errors that are outside the scope of each individual custom resource. These errors could be generic Kubernetes' error or could be errors that are global within the Operator.
 
 |E#Number|Title|Description|
 |:----|-|-|
 |5001|*Could not retrieve a Kubernetes resource*|The operator tried to retrieve a resource that exists in etcd but there was an error that prevented Kubernetes to return the object. The operator filters out NotFoundError(404) so if you see this error, it most likely means something happened.|
 |5002|*Could not retrieve list of resource*|Kubernetes returned an error when trying to retrieve a list of pods for the component. This could indicate that your Kubernetes cluster is unhealthy|
+|5003|*Could not unlock the condition*|Each custom resources have a set of conditions that the operator manipulates to reflect the state of the given resource. Usually, the operator will attempt to lock a resource before making changes to it. A failure to lock a condition means that the operator could not start working on the condition specified in the error.|
