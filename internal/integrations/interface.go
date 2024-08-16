@@ -89,7 +89,7 @@ func (c *controller) Workspace() *sequencer.Workspace {
 	return c.workspace
 }
 
-func (c *controller) Create(ctx context.Context, o client.Object, opts ...client.CreateOption) error {
+func (c *controller) reate(ctx context.Context, o client.Object, opts ...client.CreateOption) error {
 	o.SetOwnerReferences([]meta.OwnerReference{{
 		APIVersion: c.workspace.APIVersion,
 		Name:       c.workspace.Name,
