@@ -95,5 +95,36 @@ RUN apk add --no-cache git
 WORKDIR /
 COPY --from=build-dns /workspace/dns .
 
-# USER user:user
+USER 65532:65532
 ENTRYPOINT ["/dns"]
+
+# -- Solver
+FROM build-base as build-solver
+
+# Copy the go source
+COPY cmd/solver/main.go cmd/solver/main.go
+COPY api/ api/
+COPY pkg/ pkg/
+
+# Build
+# the GOARCH has not a default value to allow the binary be built according to the host where the command
+# was called. For example, if we call make docker-build in a local env which has the Apple Silicon M1 SO
+# the docker BUILDPLATFORM arg will be linux/arm64 when for Apple x86 it will be linux/amd64. Therefore,
+# by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o solver cmd/solver/main.go
+
+FROM alpine:3 as solver
+
+# Git is not required by the builder and run without it as the
+# the builder is using a go native git implementation.
+# However, buildx uses git, so as long as we use buildx, git is
+# a hard dependency.
+RUN apk update && apk upgrade --no-cache
+RUN apk add --no-cache git
+
+WORKDIR /
+COPY --from=build-solver /workspace/solver .
+
+# USER user:user
+ENTRYPOINT ["/solver"]
+

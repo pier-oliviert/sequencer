@@ -284,6 +284,7 @@ func (c cf) attachTunnelToDNSRecord(ctx context.Context, workspace *sequencer.Wo
 func (c cf) deployConnector(ctx context.Context, token string) (*core.Pod, error) {
 	pod := &core.Pod{
 		ObjectMeta: meta.ObjectMeta{
+			Namespace:    c.Namespace(),
 			GenerateName: "tunnel-cloudflare-",
 			Labels: map[string]string{
 				kCloudflareConnectorLabel: "cloudflared",

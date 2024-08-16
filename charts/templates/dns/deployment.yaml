@@ -40,8 +40,7 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - command:
-        - /manager
+      - command: ["/dns"]
         args:
           - --leader-elect
           - --health-probe-bind-address=:8081
