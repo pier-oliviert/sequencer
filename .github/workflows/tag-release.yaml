@@ -6,7 +6,7 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+"
 jobs:
   main-controller:
-    name: Build & Deploy Main controller
+    name: Main controller
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -43,7 +43,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   dns-controller:
-    name: Build & Deploy DNS Controller
+    name: DNS Controller
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -80,7 +80,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   solver:
-    name: Build & Deploy Solver
+    name: Solver
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -117,7 +117,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   builder:
-    name: Build & Deploy Builder
+    name: Builder
     runs-on: ubuntu-latest
     permissions:
       packages: write
