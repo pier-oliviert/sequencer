@@ -75,7 +75,6 @@ solver:
     name: acme-cert-tls
   replicaCount: 1
   image: pothibo/sequencer-solver:0.0.1
-  pullPolicy: Never
 
 dnsController:
   image: pothibo/sequencer-dns:0.0.1
