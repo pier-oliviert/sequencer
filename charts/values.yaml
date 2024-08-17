@@ -30,7 +30,7 @@ sequencerController:
       capabilities:
         drop:
         - ALL
-    image: pothibo/sequencer-operator:v0.2
+    image: pothibo/sequencer-operator:0.0.1
     pullPolicy: IfNotPresent
     resources:
       limits:
@@ -42,7 +42,7 @@ sequencerController:
   replicas: 1
   serviceAccount:
     annotations: {}
-  builderImage: pothibo/sequencer-builder:v0.2
+  builderImage: pothibo/sequencer-builder:0.0.1
   buildkitVersion: v0.12.4
 kubernetesClusterDomain: cluster.local
 metricsService:
@@ -74,12 +74,10 @@ solver:
   privateKeySecretRef:
     name: acme-cert-tls
   replicaCount: 1
-  image:
-    repository: pothibo/sequencer-solver
-    tag: v0.2
+  image: pothibo/sequencer-solver:0.0.1
   pullPolicy: Never
 
 dnsController:
-  image: sequencer-dns:dev
+  image: pothibo/sequencer-dns:0.0.1
   providerName: undefined
   env: []

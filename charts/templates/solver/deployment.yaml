@@ -26,7 +26,7 @@ spec:
       serviceAccountName: {{ include "operator.fullname" . }}-solver
       containers:
         - name: solver
-          image: "{{ .Values.solver.image.repository }}:{{ .Values.solver.image.tag }}"
+          image: {{ .Values.solver.image }}
           imagePullPolicy: {{ .Values.solver.pullPolicy }}
           args:
             - --tls-cert-file=/tls/tls.crt
