@@ -24,6 +24,7 @@ func NewProvider(name string) (Provider, error) {
 	case "cloudflare":
 		return NewCloudflareProvider()
 	case "aws":
+		return NewAWSProvider()
 	case "":
 		return nil, fmt.Errorf("E#6001: The environment variable %s need to be set with a valid provider name", kProviderName)
 	}
