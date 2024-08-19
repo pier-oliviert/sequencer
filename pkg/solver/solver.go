@@ -32,7 +32,7 @@ func (sp *SolverProvider) Initialize(c *rest.Config, stopCh <-chan struct{}) err
 
 	config.NegotiatedSerializer = scheme.Codecs.WithoutConversion()
 	config.UserAgent = rest.DefaultKubernetesUserAgent()
-	config.ContentConfig.GroupVersion = &sequencer.GroupVersion
+	config.GroupVersion = &sequencer.GroupVersion
 	config.APIPath = "/apis"
 
 	client, err := rest.RESTClientFor(config)
@@ -76,7 +76,7 @@ func (sp *SolverProvider) Present(ch *whapi.ChallengeRequest) error {
 			Target:     fmt.Sprintf("\"%s\"", ch.Key),
 		},
 	}
-	result := sp.client.Post().Namespace(sp.namespace).Resource("dnsendpoints").Body(ep).Do(ctx)
+	result := sp.client.Post().Namespace(sp.namespace).Resource("dnsrecords").Body(ep).Do(ctx)
 
 	return result.Error()
 }
