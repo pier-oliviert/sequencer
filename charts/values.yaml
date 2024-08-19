@@ -69,8 +69,6 @@ certManager:
     name: acme-cert-tls
 
 solver:
-  name: external-dns
-  groupName: solver.se.quencer.io
   privateKeySecretRef:
     name: acme-cert-tls
   replicaCount: 1

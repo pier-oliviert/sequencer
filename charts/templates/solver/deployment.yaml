@@ -33,9 +33,9 @@ spec:
             - --tls-private-key-file=/tls/tls.key
           env:
             - name: GROUP_NAME
-              value: {{ .Values.solver.groupName | quote }}
+              value: solver.se.quencer.io
             - name: SOLVER_NAME
-              value: {{ .Values.solver.name | quote }}
+              value: {{ include "operator.fullname" . }}-solver
             - name: SEQUENCER_NAMESPACE
               value: {{ .Release.Namespace }}
           ports:
