@@ -62,6 +62,10 @@ func (r *DNSRecordReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, fmt.Errorf("E#5001: Couldn't retrieve the DNSRecord (%s) -- %w", req.NamespacedName, err)
 	}
 
+	if record.CurrentPhase() == dnsrecords.PhaseError {
+		return ctrl.Result{}, nil
+	}
+
 	if record.CurrentPhase() == dnsrecords.PhaseInitializing {
 		err := r.createRecord(ctx, &record)
 		if err != nil {
