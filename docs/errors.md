@@ -53,7 +53,7 @@ Workspace errors are top level errors that aren't specific to any of the underly
 |:----|-|-|
 |3001|*Failed to parse the label selector*|An error with label selector should not be caused by a user, if this happens to you, please file an [issue](https://github.com/pier-oliviert/sequencer/issues)|
 |3002|*Could not create the component*|The workspace tried to create the Component custom resource with the spec provided in the Workspace's spec, but an error occured. This might be an [issue](https://github.com/pier-oliviert/sequencer/issues)|
-|3003|*Could not create a DNS record with external-dns*|There was an error creating an external-dns custom resource. The error attached might give you more information|
+|3003|*Could not create a DNS record*|There was an error creating the DNSRecord custom resource. The error attached might give you more information|
 |3004|*Secret doesn't have a value for the specified key*|The secret referenced doesn't include a value for the key given. The error message should include both the secret's name and the key that it was looking for|
 |3007|*Could not create an integration client*|There was an error initializing the integration client|
 |3008|*Could not update tunnel with DNS record information*|An error prevented the tunnel to be configured to point to the DNS record|

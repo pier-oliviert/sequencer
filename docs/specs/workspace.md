@@ -73,7 +73,7 @@ Workspace is the top-level resource where you define a full application to run. 
 The `networking` section is where the integration with cloud provider happens. Most of Sequencer's lifecycle happens within Kubernetes and is completely isolated from cloud providers. You can imagine this section as the glue between what happens within Kubernetes and the outside world.
 
 ### DNS
-The `dns` section is a direct integration with `external-dns` and `cert-manager`. Both of the dependencies needs to be fully configured before you can generate unique DNS entries for your workspace. The DNS subsection is where you specify high-level information about the workspace you want to create.
+The `dns` section is a direct integration with `cert-manager`. The dependencies needs to be fully configured before you can generate unique DNS entries for your workspace. The DNS subsection is where you specify high-level information about the workspace you want to create.
 
 |Key|Type|Required|Description|
 |:----|-|-|-|

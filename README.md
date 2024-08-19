@@ -156,8 +156,6 @@ Supported: ✅ In the work: 🏗️ Maybe: 🤞
 
 You will need to have [Cert-Manager](https://cert-manager.io/) running beforehand. The easiest way to install cert-manager is to follow their [installation guide](https://cert-manager.io/docs/installation/).
 
-You will also need to have [external-dns](https://github.com/kubernetes-sigs/external-dns) running. Their [documentation](https://kubernetes-sigs.github.io/external-dns/) also cover how to install it.
-
 If you plan on using a managed Kubernetes cluster, there's documentation on making sure everything is configured to use Sequencer, if documentation is missing for the managed solution you want to use, please [file an issue](https://github.com/pier-oliviert/sequencer/issues).
 
 |Managed Cluster|Link|

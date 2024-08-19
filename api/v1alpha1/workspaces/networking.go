@@ -11,7 +11,7 @@ import (
 //
 // +kubebuilder:object:generate=true
 type NetworkingSpec struct {
-	// The DNSSpec includes the basic information needed for external-dns to generate
+	// The DNSSpec includes the basic information needed to generate
 	// DNS entries. The spec is going to be used with the configured spec (tunnel, ingress, etc.)
 	DNS DNSSpec `json:"dns"`
 
