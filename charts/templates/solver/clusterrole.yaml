@@ -6,11 +6,11 @@ metadata:
     app: {{ include "operator.fullname" . }}-solver
 rules:
   - apiGroups:
-      - {{ .Values.solver.groupName }}
+      - solver.se.quencer.io
     resources:
       - '*'
     verbs:
       - 'create'
   - apiGroups: ["se.quencer.io"]
-    resources: ["dnsendpoints"]
+    resources: ["dnsrecords"]
     verbs: ["*"]
