@@ -62,11 +62,7 @@ func (r *DNSRecordReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, fmt.Errorf("E#5001: Couldn't retrieve the DNSRecord (%s) -- %w", req.NamespacedName, err)
 	}
 
-	if record.CurrentPhase() == dnsrecords.PhaseError {
-		return ctrl.Result{}, nil
-	}
-
-	if record.CurrentPhase() == dnsrecords.PhaseInitializing {
+	if record.IsInitializing() {
 		err := r.createRecord(ctx, &record)
 		if err != nil {
 			r.Event(&record, core.EventTypeWarning, string(dnsrecords.ProviderCondition), err.Error())
@@ -75,7 +71,7 @@ func (r *DNSRecordReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	if record.CurrentPhase() == dnsrecords.PhaseTerminating {
+	if record.IsTerminating() {
 		err := r.deleteRecord(ctx, &record)
 		if err != nil {
 			r.Event(&record, core.EventTypeWarning, string(dnsrecords.ProviderCondition), err.Error())
@@ -131,6 +127,16 @@ func (r *DNSRecordReconciler) deleteRecord(ctx context.Context, record *sequence
 	if condition.Status == conditions.ConditionTerminated && controllerutil.ContainsFinalizer(record, kDNSRecordFinalizer) {
 		controllerutil.RemoveFinalizer(record, kDNSRecordFinalizer)
 		return r.Update(ctx, record)
+	}
+
+	if record.IsErrored() {
+		conditions.SetCondition(&record.Status.Conditions, conditions.Condition{
+			Type:   dnsrecords.ProviderCondition,
+			Status: conditions.ConditionTerminated,
+			Reason: "Record had an error, not deleting the record upstream",
+		})
+
+		return r.Status().Patch(ctx, record, client.Merge)
 	}
 
 	conditions.SetCondition(&record.Status.Conditions, conditions.Condition{

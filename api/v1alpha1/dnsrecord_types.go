@@ -36,21 +36,16 @@ type DNSRecord struct {
 	Status dnsrecords.Status `json:"status,omitempty"`
 }
 
-func (r DNSRecord) CurrentPhase() dnsrecords.Phase {
-	if !r.ObjectMeta.DeletionTimestamp.IsZero() {
-		return dnsrecords.PhaseTerminating
-	}
+func (r DNSRecord) IsInitializing() bool {
+	return len(r.Status.Conditions) == 0
+}
 
-	if len(r.Status.Conditions) == 0 {
-		return dnsrecords.PhaseInitializing
-	}
+func (r DNSRecord) IsTerminating() bool {
+	return !r.DeletionTimestamp.IsZero()
+}
 
-	if conditions.IsAnyConditionWithStatus(r.Status.Conditions, conditions.ConditionError) {
-		return dnsrecords.PhaseError
-	}
-
-	// All other possibilities exhausted, the record must have been created
-	return dnsrecords.PhaseCreated
+func (r DNSRecord) IsErrored() bool {
+	return conditions.IsAnyConditionWithStatus(r.Status.Conditions, conditions.ConditionError)
 }
 
 // Finds the first condition that has an Error status and return
