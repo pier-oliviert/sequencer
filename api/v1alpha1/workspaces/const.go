@@ -7,7 +7,6 @@ import (
 const (
 	InstanceLabel string = "workspaces.sequencer.io/instance"
 	IngressLabel  string = "workspaces.sequencer.io/ingress"
-	DNSLabel      string = "workspaces.sequencer.io/dns"
 )
 
 const (

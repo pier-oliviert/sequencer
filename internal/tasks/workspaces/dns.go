@@ -67,7 +67,6 @@ func (r *DNSReconciler) Reconcile(ctx context.Context, workspace *sequencer.Work
 		record := &sequencer.DNSRecord{
 			ObjectMeta: meta.ObjectMeta{
 				Labels: map[string]string{
-					workspaces.DNSLabel:      expected.Name,
 					workspaces.InstanceLabel: workspace.Name,
 				},
 				OwnerReferences: []meta.OwnerReference{{
