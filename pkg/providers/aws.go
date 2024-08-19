@@ -48,7 +48,7 @@ func (c *r53) Create(ctx context.Context, record *sequencer.DNSRecord) error {
 			Changes: []types.Change{{
 				Action: types.ChangeActionCreate,
 				ResourceRecordSet: &types.ResourceRecordSet{
-					Name: stringPtr(fmt.Sprintf("%s.%s", record.Spec.Name, record.Spec.Zone)),
+					Name: &record.Spec.Name,
 					Type: types.RRType(record.Spec.RecordType),
 					AliasTarget: &types.AliasTarget{
 						DNSName:      &record.Spec.Target,
@@ -70,7 +70,7 @@ func (c *r53) Delete(ctx context.Context, record *sequencer.DNSRecord) error {
 			Changes: []types.Change{{
 				Action: types.ChangeActionDelete,
 				ResourceRecordSet: &types.ResourceRecordSet{
-					Name: stringPtr(fmt.Sprintf("%s.%s", record.Spec.Name, record.Spec.Zone)),
+					Name: &record.Spec.Name,
 					Type: types.RRType(record.Spec.RecordType),
 					AliasTarget: &types.AliasTarget{
 						DNSName:      &record.Spec.Target,
@@ -83,8 +83,4 @@ func (c *r53) Delete(ctx context.Context, record *sequencer.DNSRecord) error {
 
 	_, err := c.ChangeResourceRecordSets(ctx, &inputs)
 	return err
-}
-
-func stringPtr(val string) *string {
-	return &val
 }
