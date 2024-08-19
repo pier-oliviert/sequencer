@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/route53/types"
@@ -12,15 +11,17 @@ import (
 )
 
 const kAWSZoneID = "AWS_ZONE_ID"
+const kAWSHostedZoneIDForNLB = "AWS_NLB_ZONE_ID"
 
 type r53 struct {
-	zoneID string
+	NLBHostedZoneID string
+	zoneID          string
 	*route53.Client
 }
 
 func NewAWSProvider() (*r53, error) {
 	ctx := context.Background()
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithClientLogMode(aws.LogRequestWithBody|aws.LogResponseWithBody))
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -29,9 +30,14 @@ func NewAWSProvider() (*r53, error) {
 		return nil, fmt.Errorf("E#6101: Zone ID not found -- %w", err)
 	}
 
+	hostedZoneID, err := retrieveValueFromEnvOrFile(kAWSHostedZoneIDForNLB)
+	if err != nil {
+		return nil, fmt.Errorf("E#6101: NLB Hosted Zone ID not found -- %w", err)
+	}
 	return &r53{
-		zoneID: zoneID,
-		Client: route53.NewFromConfig(cfg),
+		zoneID:          zoneID,
+		NLBHostedZoneID: hostedZoneID,
+		Client:          route53.NewFromConfig(cfg),
 	}, nil
 }
 
@@ -46,14 +52,14 @@ func (c *r53) Create(ctx context.Context, record *sequencer.DNSRecord) error {
 					Type: types.RRType(record.Spec.RecordType),
 					AliasTarget: &types.AliasTarget{
 						DNSName:      &record.Spec.Target,
-						HostedZoneId: &c.zoneID,
+						HostedZoneId: &c.NLBHostedZoneID,
 					},
 				},
 			}},
 		},
 	}
 
-	_, err := c.Client.ChangeResourceRecordSets(ctx, &inputs)
+	_, err := c.ChangeResourceRecordSets(ctx, &inputs)
 	return err
 }
 
@@ -68,14 +74,14 @@ func (c *r53) Delete(ctx context.Context, record *sequencer.DNSRecord) error {
 					Type: types.RRType(record.Spec.RecordType),
 					AliasTarget: &types.AliasTarget{
 						DNSName:      &record.Spec.Target,
-						HostedZoneId: &c.zoneID,
+						HostedZoneId: &c.NLBHostedZoneID,
 					},
 				},
 			}},
 		},
 	}
 
-	_, err := c.Client.ChangeResourceRecordSets(ctx, &inputs)
+	_, err := c.ChangeResourceRecordSets(ctx, &inputs)
 	return err
 }
 
