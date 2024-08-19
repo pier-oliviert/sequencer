@@ -65,7 +65,7 @@ func (r *DNSRecordReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if record.CurrentPhase() == dnsrecords.PhaseInitializing {
 		err := r.createRecord(ctx, &record)
 		if err != nil {
-			r.EventRecorder.Event(&record, core.EventTypeWarning, string(dnsrecords.ProviderCondition), err.Error())
+			r.Event(&record, core.EventTypeWarning, string(dnsrecords.ProviderCondition), err.Error())
 		}
 
 		return ctrl.Result{}, err
@@ -74,7 +74,7 @@ func (r *DNSRecordReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if record.CurrentPhase() == dnsrecords.PhaseTerminating {
 		err := r.deleteRecord(ctx, &record)
 		if err != nil {
-			r.EventRecorder.Event(&record, core.EventTypeWarning, string(dnsrecords.ProviderCondition), err.Error())
+			r.Event(&record, core.EventTypeWarning, string(dnsrecords.ProviderCondition), err.Error())
 		}
 
 		return ctrl.Result{}, err
@@ -95,7 +95,7 @@ func (r *DNSRecordReconciler) createRecord(ctx context.Context, record *sequence
 	}
 
 	if controllerutil.AddFinalizer(record, kDNSRecordFinalizer) {
-		if err := r.Client.Update(ctx, record); err != nil {
+		if err := r.Update(ctx, record); err != nil {
 			return err
 		}
 	}
@@ -107,7 +107,7 @@ func (r *DNSRecordReconciler) createRecord(ctx context.Context, record *sequence
 			Reason: err.Error(),
 		})
 
-		if updateErr := r.Client.Status().Patch(ctx, record, client.Merge); err != nil {
+		if updateErr := r.Client.Status().Patch(ctx, record, client.Merge); updateErr != nil {
 			return fmt.Errorf("%w -- %w", updateErr, err)
 		}
 		return err
@@ -126,7 +126,7 @@ func (r *DNSRecordReconciler) deleteRecord(ctx context.Context, record *sequence
 	condition := conditions.FindCondition(record.Status.Conditions, dnsrecords.ProviderCondition)
 	if condition.Status == conditions.ConditionTerminated && controllerutil.ContainsFinalizer(record, kDNSRecordFinalizer) {
 		controllerutil.RemoveFinalizer(record, kDNSRecordFinalizer)
-		return r.Client.Update(ctx, record)
+		return r.Update(ctx, record)
 	}
 
 	conditions.SetCondition(&record.Status.Conditions, conditions.Condition{
@@ -146,7 +146,7 @@ func (r *DNSRecordReconciler) deleteRecord(ctx context.Context, record *sequence
 			Reason: err.Error(),
 		})
 
-		if updateErr := r.Client.Status().Patch(ctx, record, client.Merge); err != nil {
+		if updateErr := r.Status().Patch(ctx, record, client.Merge); updateErr != nil {
 			return fmt.Errorf("%w -- %w", updateErr, err)
 		}
 		return err
@@ -158,7 +158,7 @@ func (r *DNSRecordReconciler) deleteRecord(ctx context.Context, record *sequence
 		Reason: "Provider deleted the DNS record",
 	})
 
-	return r.Client.Status().Patch(ctx, record, client.Merge)
+	return r.Status().Patch(ctx, record, client.Merge)
 }
 
 // SetupWithManager sets up the controller with the Manager.
