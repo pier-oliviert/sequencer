@@ -13,5 +13,5 @@ spec:
     solvers:
       - dns01:
           webhook:
-            groupName: {{ .Values.solver.groupName | quote }}
-            solverName: {{ .Values.solver.name | quote }}
+            groupName: solver.se.quencer.io
+            solverName: {{ include "operator.fullname" . }}-solver

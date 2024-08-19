@@ -77,4 +77,6 @@ solver:
 dnsController:
   image: pothibo/sequencer-dns:0.0.1
   providerName: undefined
+  serviceAccount:
+    annotations: {}
   env: []
