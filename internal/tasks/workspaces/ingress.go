@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	sequencer "github.com/pier-oliviert/sequencer/api/v1alpha1"
 	"github.com/pier-oliviert/sequencer/api/v1alpha1/components"
@@ -50,62 +51,69 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 		return &ctrl.Result{}, i.Status().Update(ctx, workspace)
 	}
 
-	// There's only a subset of condition status that this task reconciler can handle. Any others means there's
-	// nothing to do here
-	if !(condition.Status == conditions.ConditionInitialized || condition.Status == conditions.ConditionWaiting) {
-		return nil, nil
-	}
-
 	// Ingresses requires two DNSRecord to work properly. A top-level DNS record that can be used
 	// by the application as the primary point. The other is a wildcard DNS record for any subdomain that the
 	// application might need.
 
-	loadBalancerSvc, err := i.getLoadBalancer(ctx, workspace.Spec.Networking.Ingress.LoadBalancerRef)
-	if err != nil {
-		return nil, fmt.Errorf("E#3013: Could not find load balancer with Reference: %s -- %w", workspace.Spec.Networking.Ingress.LoadBalancerRef.String(), err)
-	}
-
-	ingressHostname := loadBalancerSvc.Status.LoadBalancer.Ingress[0].Hostname
-	hostname := fmt.Sprintf("%s.%s", workspace.Name, workspace.Spec.Networking.DNS.Zone)
-
-	workspace.Status.DNS = append(workspace.Status.DNS, workspaces.DNS{
-		RecordType: "A",
-		Name:       hostname,
-		Target:     ingressHostname,
-	}, workspaces.DNS{
-		RecordType: "A",
-		Name:       fmt.Sprintf("*.%s", hostname),
-		Target:     ingressHostname,
-	})
-
-	spec := workspace.Spec.Networking.Ingress
-
-	services, err := i.findServices(ctx, workspace, spec.Rules)
-	if errors.Is(err, ErrServiceNotYetReady) {
-		i.EventRecorder.Event(workspace, core.EventTypeNormal, string(workspaces.IngressCondition), "Waiting for components to be ready")
-		if condition.Status != conditions.ConditionWaiting {
-			conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
-				Type:   workspaces.IngressCondition,
-				Status: conditions.ConditionWaiting,
-				Reason: "Waiting on component to be ready",
-			})
-			return &ctrl.Result{}, i.Status().Update(ctx, workspace)
+	if condition.Status == conditions.ConditionInitialized {
+		loadBalancerSvc, err := i.getLoadBalancer(ctx, workspace.Spec.Networking.Ingress.LoadBalancerRef)
+		if err != nil {
+			return nil, fmt.Errorf("E#3013: Could not find load balancer with Reference: %s -- %w", workspace.Spec.Networking.Ingress.LoadBalancerRef.String(), err)
 		}
 
-		return &ctrl.Result{}, nil
-	}
+		ingressHostname := loadBalancerSvc.Status.LoadBalancer.Ingress[0].Hostname
+		hostname := fmt.Sprintf("%s.%s", workspace.Name, workspace.Spec.Networking.DNS.Zone)
 
-	// Future-proofing for when findServices can return a different error
-	if err != nil {
+		workspace.Status.DNS = append(workspace.Status.DNS, workspaces.DNS{
+			RecordType: "A",
+			Name:       hostname,
+			Target:     ingressHostname,
+		}, workspaces.DNS{
+			RecordType: "A",
+			Name:       fmt.Sprintf("*.%s", hostname),
+			Target:     ingressHostname,
+		})
+
 		conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 			Type:   workspaces.IngressCondition,
-			Status: conditions.ConditionError,
-			Reason: err.Error(),
+			Status: conditions.ConditionWaiting,
+			Reason: "Waiting on component to be ready",
 		})
-		return nil, err
+
+		return &ctrl.Result{}, i.Status().Update(ctx, workspace)
 	}
 
-	i.EventRecorder.Event(workspace, core.EventTypeNormal, string(workspaces.IngressCondition), "Networks configured, creating the ingress")
+	var services []*core.Service
+	spec := workspace.Spec.Networking.Ingress
+
+	if condition.Status == conditions.ConditionWaiting {
+		var err error
+		services, err = i.findServices(ctx, workspace, spec.Rules)
+		if errors.Is(err, ErrServiceNotYetReady) {
+			i.Event(workspace, core.EventTypeNormal, string(workspaces.IngressCondition), "Waiting for components to be ready")
+			// nil implicitly means that if the status updates returns no errors, the
+			// main reconciliation loop will keep going.
+			return nil, i.Status().Update(ctx, workspace)
+		}
+
+		// Future-proofing for when findServices can return a different error
+		if err != nil {
+			conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
+				Type:   workspaces.IngressCondition,
+				Status: conditions.ConditionError,
+				Reason: err.Error(),
+			})
+			return nil, err
+		}
+	}
+
+	if condition.Status == conditions.ConditionLocked {
+		return &ctrl.Result{
+			RequeueAfter: time.Second * 5,
+		}, nil
+	}
+
+	i.Event(workspace, core.EventTypeNormal, string(workspaces.IngressCondition), "Networks configured, creating the ingress")
 	conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 		Type:   workspaces.IngressCondition,
 		Status: conditions.ConditionLocked,
@@ -139,10 +147,7 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 		Spec: networking.IngressSpec{
 			IngressClassName: spec.ClassName,
 			TLS: []networking.IngressTLS{{
-				Hosts: []string{
-					workspace.Status.Host,
-					fmt.Sprintf("*.%s", workspace.Status.Host),
-				},
+				Hosts:      i.hostForWorkspace(workspace.Status.DNS),
 				SecretName: fmt.Sprintf("%s-tls", workspace.Name),
 			}},
 		},
@@ -252,6 +257,14 @@ func (i *IngressReconciler) findServices(ctx context.Context, workspace *sequenc
 	}
 
 	return services, err
+}
+
+func (i *IngressReconciler) hostForWorkspace(dns []workspaces.DNS) (hosts []string) {
+	for _, r := range dns {
+		hosts = append(hosts, r.Name)
+	}
+
+	return hosts
 }
 
 // Retrieves the Service using the passed reference. The Service needs to be of type `LoadBalancer`. Returns
