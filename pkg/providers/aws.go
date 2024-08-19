@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/route53/types"
@@ -19,11 +20,10 @@ type r53 struct {
 
 func NewAWSProvider() (*r53, error) {
 	ctx := context.Background()
-	cfg, err := config.LoadDefaultConfig(ctx)
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithClientLogMode(aws.LogRequestWithBody|aws.LogResponseWithBody))
 	if err != nil {
 		return nil, err
 	}
-
 	zoneID, err := retrieveValueFromEnvOrFile(kAWSZoneID)
 	if err != nil {
 		return nil, fmt.Errorf("E#6101: Zone ID not found -- %w", err)
