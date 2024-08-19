@@ -51,9 +51,9 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 		return &ctrl.Result{}, i.Status().Update(ctx, workspace)
 	}
 
-	// Ingresses requires two DNSRecord to work properly. A top-level DNS record that can be used
-	// by the application as the primary point. The other is a wildcard DNS record for any subdomain that the
-	// application might need.
+	if condition.Status == conditions.ConditionCompleted {
+		return nil, nil
+	}
 
 	if condition.Status == conditions.ConditionInitialized {
 		loadBalancerSvc, err := i.getLoadBalancer(ctx, workspace.Spec.Networking.Ingress.LoadBalancerRef)
@@ -64,6 +64,9 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 		ingressHostname := loadBalancerSvc.Status.LoadBalancer.Ingress[0].Hostname
 		hostname := fmt.Sprintf("%s.%s", workspace.Name, workspace.Spec.Networking.DNS.Zone)
 
+		// Ingresses requires two DNSRecord to work properly. A top-level DNS record that can be used
+		// by the application as the primary point. The other is a wildcard DNS record for any subdomain that the
+		// application might need.
 		workspace.Status.DNS = append(workspace.Status.DNS, workspaces.DNS{
 			RecordType: "A",
 			Name:       hostname,
@@ -103,7 +106,7 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 				Status: conditions.ConditionError,
 				Reason: err.Error(),
 			})
-			return nil, err
+			return nil, i.Status().Update(ctx, workspace)
 		}
 	}
 
