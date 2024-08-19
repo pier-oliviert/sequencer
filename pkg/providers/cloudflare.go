@@ -58,7 +58,7 @@ func (c *cf) Create(ctx context.Context, record *sequencer.DNSRecord) error {
 		Content: record.Spec.Target,
 	}
 
-	if workspaceName, ok := record.ObjectMeta.Labels[workspaces.InstanceLabel]; ok {
+	if workspaceName, ok := record.Labels[workspaces.InstanceLabel]; ok {
 		dnsParams.Comment = fmt.Sprintf("Record managed by sequencer for workspace: %s", workspaceName)
 	}
 
@@ -67,7 +67,7 @@ func (c *cf) Create(ctx context.Context, record *sequencer.DNSRecord) error {
 		*dnsParams.Proxied = strings.EqualFold(proxied, "true")
 	}
 
-	response, err := c.API.CreateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), dnsParams)
+	response, err := c.CreateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), dnsParams)
 	if err != nil {
 		return err
 	}
@@ -85,5 +85,5 @@ func (c *cf) Delete(ctx context.Context, record *sequencer.DNSRecord) error {
 		return nil
 	}
 
-	return c.API.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), *record.Status.RemoteID)
+	return c.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), *record.Status.RemoteID)
 }
