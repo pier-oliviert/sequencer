@@ -76,6 +76,7 @@ func (i *IngressReconciler) Reconcile(ctx context.Context, workspace *sequencer.
 			Name:       fmt.Sprintf("*.%s", hostname),
 			Target:     ingressHostname,
 		})
+		workspace.Status.Host = hostname
 
 		conditions.SetCondition(&workspace.Status.Conditions, conditions.Condition{
 			Type:   workspaces.IngressCondition,
