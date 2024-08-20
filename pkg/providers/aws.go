@@ -96,6 +96,9 @@ func (c *r53) resourceRecordSet(record *sequencer.DNSRecord) *types.ResourceReco
 		set.ResourceRecords = append(set.ResourceRecords, types.ResourceRecord{
 			Value: &record.Spec.Target,
 		})
+		set.TTL = new(int64)
+		*set.TTL = 60
+
 	}
 
 	return &set
