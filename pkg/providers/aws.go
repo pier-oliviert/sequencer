@@ -11,11 +11,13 @@ import (
 )
 
 const kAWSZoneID = "AWS_ZONE_ID"
-const kAWSHostedZoneIDForNLB = "AWS_NLB_ZONE_ID"
+const kAWSHostedZoneID = "AWS_HOSTED_ZONE_ID"
+const kAWSLoadBalancerHost = "AWS_LOAD_BALANCER_HOST"
 
 type r53 struct {
-	NLBHostedZoneID string
-	zoneID          string
+	hostedZoneID     string
+	zoneID           string
+	loadBalancerHost string
 	*route53.Client
 }
 
@@ -30,14 +32,21 @@ func NewAWSProvider() (*r53, error) {
 		return nil, fmt.Errorf("E#6101: Zone ID not found -- %w", err)
 	}
 
-	hostedZoneID, err := retrieveValueFromEnvOrFile(kAWSHostedZoneIDForNLB)
+	hostedZoneID, err := retrieveValueFromEnvOrFile(kAWSHostedZoneID)
 	if err != nil {
-		return nil, fmt.Errorf("E#6101: NLB Hosted Zone ID not found -- %w", err)
+		return nil, fmt.Errorf("E#6101: Hosted Zone ID not found -- %w", err)
 	}
+
+	loadBalancerHost, err := retrieveValueFromEnvOrFile(kAWSLoadBalancerHost)
+	if err != nil {
+		return nil, fmt.Errorf("E#6101: Load balancer host not found -- %w", err)
+	}
+
 	return &r53{
-		zoneID:          zoneID,
-		NLBHostedZoneID: hostedZoneID,
-		Client:          route53.NewFromConfig(cfg),
+		zoneID:           zoneID,
+		hostedZoneID:     hostedZoneID,
+		loadBalancerHost: loadBalancerHost,
+		Client:           route53.NewFromConfig(cfg),
 	}, nil
 }
 
@@ -46,15 +55,8 @@ func (c *r53) Create(ctx context.Context, record *sequencer.DNSRecord) error {
 		HostedZoneId: &c.zoneID,
 		ChangeBatch: &types.ChangeBatch{
 			Changes: []types.Change{{
-				Action: types.ChangeActionCreate,
-				ResourceRecordSet: &types.ResourceRecordSet{
-					Name: &record.Spec.Name,
-					Type: types.RRType(record.Spec.RecordType),
-					AliasTarget: &types.AliasTarget{
-						DNSName:      &record.Spec.Target,
-						HostedZoneId: &c.NLBHostedZoneID,
-					},
-				},
+				Action:            types.ChangeActionCreate,
+				ResourceRecordSet: c.resourceRecordSet(record),
 			}},
 		},
 	}
@@ -68,19 +70,33 @@ func (c *r53) Delete(ctx context.Context, record *sequencer.DNSRecord) error {
 		HostedZoneId: &c.zoneID,
 		ChangeBatch: &types.ChangeBatch{
 			Changes: []types.Change{{
-				Action: types.ChangeActionDelete,
-				ResourceRecordSet: &types.ResourceRecordSet{
-					Name: &record.Spec.Name,
-					Type: types.RRType(record.Spec.RecordType),
-					AliasTarget: &types.AliasTarget{
-						DNSName:      &record.Spec.Target,
-						HostedZoneId: &c.NLBHostedZoneID,
-					},
-				},
+				Action:            types.ChangeActionDelete,
+				ResourceRecordSet: c.resourceRecordSet(record),
 			}},
 		},
 	}
 
 	_, err := c.ChangeResourceRecordSets(ctx, &inputs)
 	return err
+}
+
+// Convert a DNSRecord to a resourceRecordSet
+func (c *r53) resourceRecordSet(record *sequencer.DNSRecord) *types.ResourceRecordSet {
+	set := types.ResourceRecordSet{
+		Name: &record.Spec.Name,
+		Type: types.RRType(record.Spec.RecordType),
+	}
+
+	if set.Type == types.RRTypeA || set.Type == types.RRTypeCname {
+		set.AliasTarget = &types.AliasTarget{
+			DNSName:      &record.Spec.Target,
+			HostedZoneId: &c.hostedZoneID,
+		}
+	} else {
+		set.ResourceRecords = append(set.ResourceRecords, types.ResourceRecord{
+			Value: &record.Spec.Target,
+		})
+	}
+
+	return &set
 }
