@@ -72,7 +72,7 @@ func (sp *SolverProvider) Present(ch *whapi.ChallengeRequest) error {
 		},
 		Spec: sequencer.DNSRecordSpec{
 			RecordType: "TXT",
-			Name:       strings.TrimSuffix(ch.ResolvedFQDN, "."),
+			Name:       ch.ResolvedFQDN,
 			Target:     fmt.Sprintf("\"%s\"", ch.Key),
 		},
 	}
@@ -98,7 +98,7 @@ func (sp *SolverProvider) CleanUp(ch *whapi.ChallengeRequest) error {
 	// it's a list, let's process all of them.
 
 	for _, record := range challenges.Items {
-		if record.Spec.Target == ch.Key {
+		if record.Spec.Target == fmt.Sprintf("\"%s\"", ch.Key) {
 			result := sp.client.Delete().Namespace(sp.namespace).Resource("dnsrecords").Name(record.Name).Do(ctx)
 			if err := result.Error(); err != nil {
 				return err
