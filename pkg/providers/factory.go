@@ -26,10 +26,10 @@ func NewProvider(name string) (Provider, error) {
 	case "aws":
 		return NewAWSProvider()
 	case "":
-		return nil, fmt.Errorf("E#6001: The environment variable %s need to be set with a valid provider name", kProviderName)
+		return nil, fmt.Errorf("E#4001: The environment variable %s need to be set with a valid provider name", kProviderName)
 	}
 
-	return nil, fmt.Errorf("E#6001: The environment variable %s need to be set with a valid provider name, got %s", kProviderName, name)
+	return nil, fmt.Errorf("E#4001: The environment variable %s need to be set with a valid provider name, got %s", kProviderName, name)
 }
 
 // Same as NewProvider but throw a fatal exception if
@@ -57,7 +57,7 @@ func retrieveValueFromEnvOrFile(envNameOrFileName string) (content string, err e
 		path := fmt.Sprintf("%s/%s", kProviderConfigPath, envNameOrFileName)
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return "", fmt.Errorf("E#TODO: %s does not exist as an environment variable and a file(%s) with this name could not be found", envNameOrFileName, path)
+			return "", fmt.Errorf("E#4002: %s does not exist as an environment variable and a file(%s) with this name could not be found", envNameOrFileName, path)
 		}
 		content = string(data)
 	}

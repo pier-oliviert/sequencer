@@ -64,6 +64,13 @@ Workspace errors are top level errors that aren't specific to any of the underly
 |3013|*Could not retrieve the load balancer*|The service type=LoadBalancer could not be found matching the reference provided. Make sure it exists and the namespace/name are correct|
 
 ## Integration Errors
+Errors related to integration with third parties.
+
+|E#Number|Title|Description|
+|:----|-|-|
+|4001|*No cloud provider specified*|The provider specified is not supported (could be empty). The provider usually needs to be set through [Helm values](../docs/helm.md).|
+|4002|*Missing user value*|The provider requires user provided values that weren't supplied. These values are usually provided through a Secret or environment variable. The error message has more context as to what's missing|
+|4003|*API Client could not be created*|The API client that connects to the cloud provider encountered an error and couldn't be created. An underlying error might be present to give better context|
 
 
 ## System Errors
@@ -74,3 +81,4 @@ Errors that are outside the scope of each individual custom resource. These erro
 |5001|*Could not retrieve a Kubernetes resource*|The operator tried to retrieve a resource that exists in etcd but there was an error that prevented Kubernetes to return the object. The operator filters out NotFoundError(404) so if you see this error, it most likely means something happened.|
 |5002|*Could not retrieve list of resource*|Kubernetes returned an error when trying to retrieve a list of pods for the component. This could indicate that your Kubernetes cluster is unhealthy|
 |5003|*Could not unlock the condition*|Each custom resources have a set of conditions that the operator manipulates to reflect the state of the given resource. Usually, the operator will attempt to lock a resource before making changes to it. A failure to lock a condition means that the operator could not start working on the condition specified in the error.|
+|5004|*Could not unlock the condition*|Sequencer attempted to unlock a condition and Kubernetes API server returned an error. The error could be transient due to the resource being modified elsewhere, please file and [issue](https://github.com/pier-oliviert/sequencer/issues) if this causes stability issues.|

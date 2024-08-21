@@ -29,19 +29,19 @@ type cf struct {
 func NewCloudflareProvider() (*cf, error) {
 	token, err := retrieveValueFromEnvOrFile(kCloudflareAPIKeyName)
 	if err != nil {
-		return nil, fmt.Errorf("E#6100: API Key not found -- %w", err)
+		return nil, fmt.Errorf("E#4002: API Key not found -- %w", err)
 	}
 
 	zoneID, err := retrieveValueFromEnvOrFile(kCloudflareZoneID)
 	if err != nil {
-		return nil, fmt.Errorf("E#6101: Zone ID not found -- %w", err)
+		return nil, fmt.Errorf("E#4002: Zone ID not found -- %w", err)
 	}
 
 	// Trimming space in case the user included a space when copying the token over. This small
 	// quality of life fix might just make it easier to work with token (debugging white spaces when trying new tools can be frustrating)
 	api, err := cloudflare.NewWithAPIToken(strings.TrimSpace(token))
 	if err != nil {
-		return nil, fmt.Errorf("E#6102: Could not create new Cloudflare Client -- %w", err)
+		return nil, fmt.Errorf("E#4003: Could not create new Cloudflare Client -- %w", err)
 	}
 
 	return &cf{

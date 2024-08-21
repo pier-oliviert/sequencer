@@ -29,17 +29,17 @@ func NewAWSProvider() (*r53, error) {
 	}
 	zoneID, err := retrieveValueFromEnvOrFile(kAWSZoneID)
 	if err != nil {
-		return nil, fmt.Errorf("E#6101: Zone ID not found -- %w", err)
+		return nil, fmt.Errorf("E#4102: Zone ID not found -- %w", err)
 	}
 
 	hostedZoneID, err := retrieveValueFromEnvOrFile(kAWSHostedZoneID)
 	if err != nil {
-		return nil, fmt.Errorf("E#6101: Hosted Zone ID not found -- %w", err)
+		return nil, fmt.Errorf("E#4102: Hosted Zone ID not found -- %w", err)
 	}
 
 	loadBalancerHost, err := retrieveValueFromEnvOrFile(kAWSLoadBalancerHost)
 	if err != nil {
-		return nil, fmt.Errorf("E#6101: Load balancer host not found -- %w", err)
+		return nil, fmt.Errorf("E#4102: Load balancer host not found -- %w", err)
 	}
 
 	return &r53{

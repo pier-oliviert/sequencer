@@ -149,7 +149,7 @@ func (c *controller) Guard(ctx context.Context, reason string, task Task) error 
 	status, reason, err := task()
 	if err != nil {
 		if updateErr := c.UpdateCondition(ctx, conditions.ConditionError, err.Error()); updateErr != nil {
-			logger.Error(updateErr, "E#TODO: Could not unlock the condition")
+			logger.Error(updateErr, "E#5004: Could not unlock the condition")
 		}
 		return err
 	}
