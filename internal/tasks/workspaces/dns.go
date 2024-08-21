@@ -52,10 +52,12 @@ func (r *DNSReconciler) Reconcile(ctx context.Context, workspace *sequencer.Work
 					Reason: err.Error(),
 				})
 
+				workspace.Status.Phase = workspaces.PhaseError
+
 				// It's possible that more than one DNS record has an error, but it would massively increase the
 				// complexity of surfacing those errors back to the user through conditions. Instead, the reconciliation
 				// process will only surface the first error it finds and push it to the global condition.
-				return &ctrl.Result{}, r.Status().Patch(ctx, &record, client.Merge)
+				return &ctrl.Result{}, r.Status().Patch(ctx, workspace, client.Merge)
 			}
 		}
 
