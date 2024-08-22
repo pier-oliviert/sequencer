@@ -6,13 +6,9 @@ Imagine you have an application that has a MySQL database and a Redis cache, you
 You'd like to have the application deployed with the latest change from the branch you're working on too. You probably already have a Dockerfile that can build this for you. Here's the template you'd create, for this application:
 
 ```yaml
-apiVersion: se.quenecer.io/v1alpha1
+apiVersion: se.quencer.io/v1alpha1
 kind: Workspace
 metadata:
-  labels:
-    app.kubernetes.io/instance: workspace-sample
-    app.kubernetes.io/managed-by: sequencer
-    app.kubernetes.io/created-by: sequencer
   generateName: workspace-sample-
   namespace: sequencer-system
 spec:
