@@ -1,9 +1,19 @@
-# What is Sequencer?
+# Sequencer: Preview environments in Kubernetes!
+
 Sequencer is a Open Source Kubernetes [Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) that manages previews of your production application. Users of PaaS like Heroku and Vercel are familiar with the concept of running ephemeral environments for testing and QA purposes. You can now to do the same, wherever your infrastructure lives. **You can go from zero to a fully deployed application all within your own Kubernetes cluster**.
 
 Imagine you have an application that has a MySQL database and a Redis cache, you'd like each PR to have a preview application deployed, it doesn't have to have all the bell and whistles a production environment would have, but you'd like to have the application _behave_ like one.
 
 You'd like to have the application deployed with the latest change from the branch you're working on too. You probably already have a Dockerfile that can build this for you. Here's the template you'd create, for this application:
+
+## Features
+
+- Build image with [Buildkit](https://docs.docker.com/build/buildkit/)
+- Cache images locally with [Distribution](https://github.com/distribution/distribution)
+- Publish images to your Container Registry (Docker, AWS, Google, etc.)
+- Deploy your application with all its dependencies
+- Create network routes using integrations (Cloudflare, AWS, Google, etc.)
+- Create unique URL that points to your deployed application
 
 ```yaml
 apiVersion: se.quencer.io/v1alpha1
@@ -127,46 +137,8 @@ This project is still very early on and as such, should be considered a technica
 
 The goal for Sequencer is to deliver a high quality software. You can [read more about the philosophy behind Sequencer](./PHILOSOPHY.md).
 
-## Features
-
-- Build image with [Buildkit](https://docs.docker.com/build/buildkit/)
-- Cache images locally with [Distribution](https://github.com/distribution/distribution)
-- Publish images to your Container Registry (Docker, AWS, Google, etc.)
-- Deploy your application with all its dependencies
-- Create network routes using integrations (Cloudflare, AWS, Google, etc.)
-- Create unique URL that points to your deployed application
-
-### Supported cloud providers
-
-|Provider Name|DNS|Ingress|Tunneling|
-|:--------|-|-|-|
-|Cloudflare|✅|🤞|✅|
-|AWS|✅|✅|🤞|
-|Google|🤞|🏗️|🏗️|
-
-Supported: ✅ In the work: 🏗️ Maybe: 🤞
 
 ## Install
-
-### Dependencies
-
-You will need to have [Cert-Manager](https://cert-manager.io/) running beforehand. The easiest way to install cert-manager is to follow their [installation guide](https://cert-manager.io/docs/installation/).
-
-If you plan on using a managed Kubernetes cluster, there's documentation on making sure everything is configured to use Sequencer, if documentation is missing for the managed solution you want to use, please [file an issue](https://github.com/pier-oliviert/sequencer/issues).
-
-|Managed Cluster|Link|
-|:--------|-|
-|AWS EKS|[Documentation](docs/managed/eks.md)|
-
-
-### Default Helm installation
-Using [Helm](https://helm.sh/), you can install Sequencer as follows:
-
-```sh
-helm install sequencer https://github.com/pier-oliviert/sequencer/releases/download/v0.1/sequencer-0.1.0.tgz \
-  --namespace sequencer-system \
-  --create-namespace
-```
 
 ## Try it out!
 

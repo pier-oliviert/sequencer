@@ -65,3 +65,7 @@ helm install sequencer https://github.com/pier-oliviert/sequencer/releases/downl
   --create-namespace \
   --kubeconfig ~/.kube/aws.config
 ```
+
+## DNS Service Account Permissions
+
+The cluster needs to be configured with the OIDC provider following the guide here: https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
