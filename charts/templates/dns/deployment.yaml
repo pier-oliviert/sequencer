@@ -44,12 +44,14 @@ spec:
         args:
           - --leader-elect
           - --health-probe-bind-address=:8081
-        image: {{ quote .Values.dnsController.image }}
+        image: {{ .Values.dns.image }}
         name: manager
         env:
           - name: DNS_SEQUENCER_PROVIDER_NAME
-            value: {{ .Values.dnsController.providerName }}  
-          {{- toYaml .Values.dnsController.env | nindent 10 }}
+            value: {{ .Values.dns.providerName }}  
+          {{- if .Values.dns.env }}
+            {{- toYaml .Values.dns.env | nindent 10 }}
+          {{- end }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

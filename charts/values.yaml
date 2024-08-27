@@ -1,7 +1,14 @@
+certManager:
+  serviceAccount:
+    name: cert-manager
+    namespace: cert-manager
+  server: https://acme-v02.api.letsencrypt.org/directory
+  email: your@email.com
+  privateKeySecretRef:
+    name: acme-cert-tls
+
 distribution:
-  image:
-    repository: registry
-    tag: latest
+  image: registry:latest
   buildCache:
     replicas: 1
     resources:
@@ -21,62 +28,35 @@ distribution:
         cpu: 400m
         memory: 2Gi
 
-sequencerController:
-  manager:
-    args:
-    - --leader-elect
-    containerSecurityContext:
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-        - ALL
-    image: pothibo/sequencer-operator:0.0.1
-    pullPolicy: IfNotPresent
-    resources:
-      limits:
-        cpu: 500m
-        memory: 128Mi
-      requests:
-        cpu: 10m
-        memory: 64Mi
+sequencer:
+  image: pothibo/sequencer-operator:0.0.1
+  pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
   replicas: 1
   serviceAccount:
     annotations: {}
-  builderImage: pothibo/sequencer-builder:0.0.1
-  buildkitVersion: v0.12.4
-kubernetesClusterDomain: cluster.local
-metricsService:
-  ports:
-  - name: https
-    port: 8443
-    protocol: TCP
-    targetPort: https
-  type: ClusterIP
-webhookService:
-  ports:
-  - port: 443
-    protocol: TCP
-    targetPort: 9443
-  type: ClusterIP
 
-certManager:
-  serviceAccount:
-    name: cert-manager
-    namespace: cert-manager
-  server: https://acme-v02.api.letsencrypt.org/directory
-  email: your@email.com
-  privateKeySecretRef:
-    name: acme-cert-tls
+
+builder:
+  image: pothibo/sequencer-builder:0.0.1
+  pullPolicy: IfNotPresent
+  buildkitVersion: v0.12.4
 
 solver:
+  image: pothibo/sequencer-solver:0.0.1
   privateKeySecretRef:
     name: acme-cert-tls
-  replicaCount: 1
-  image: pothibo/sequencer-solver:0.0.1
+  replicas: 1
 
-dnsController:
+dns:
   image: pothibo/sequencer-dns:0.0.1
   providerName: undefined
   serviceAccount:
     annotations: {}
-  env: []
+  env:

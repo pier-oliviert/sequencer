@@ -7,7 +7,6 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ include "operator.fullname" . }}-docker-cache
     app.kubernetes.io/component: distribution
-    app.kubernetes.io/created-by: {{ include "operator.fullname" . }}
     app.kubernetes.io/part-of: {{ include "operator.fullname" . }}
     control-plane: controller-manager
 spec:
@@ -16,7 +15,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "operator.fullname" . }}-docker-cache
       app.kubernetes.io/component: distribution
-      app.kubernetes.io/created-by: {{ include "operator.fullname" . }}
       app.kubernetes.io/part-of: {{ include "operator.fullname" . }}
       control-plane: docker-cache
   template:
@@ -24,7 +22,6 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "operator.fullname" . }}-docker-cache
         app.kubernetes.io/component: distribution
-        app.kubernetes.io/created-by: {{ include "operator.fullname" . }}
         app.kubernetes.io/part-of: {{ include "operator.fullname" . }}
         control-plane: docker-cache
       annotations:
@@ -35,8 +32,7 @@ spec:
       - env:
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
-        image: {{ .Values.distribution.image.repository }}:{{ .Values.distribution.image.tag
-          | default .Chart.AppVersion }}
+        image: {{ .Values.distribution.image }}
         name: distribution
         resources: {{- toYaml .Values.distribution.dockerCache.resources | nindent 10 }}
         volumeMounts:

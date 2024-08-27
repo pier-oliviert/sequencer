@@ -8,7 +8,7 @@ metadata:
     control-plane: sequencer-controller
   {{- include "operator.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.sequencerController.replicas }}
+  replicas: {{ .Values.sequencer.replicas }}
   selector:
     matchLabels:
       control-plane: sequencer-controller
@@ -35,17 +35,18 @@ spec:
                 values:
                 - linux
       containers:
-      - args: {{- toYaml .Values.sequencerController.manager.args | nindent 8 }}
+      - args:
+          - --leader-elect
         command:
         - /manager
         env:
         - name: KUBERNETES_CLUSTER_DOMAIN
-          value: {{ quote .Values.kubernetesClusterDomain }}
+          value: cluster.local
         envFrom:
         - configMapRef:
             name: {{ include "operator.fullname" . }}-controller
-        image: {{ quote .Values.sequencerController.manager.image }}
-        imagePullPolicy: {{ .Values.sequencerController.pullPolicy }}
+        image: {{ quote .Values.sequencer.image }}
+        imagePullPolicy: {{ .Values.sequencer.pullPolicy }}
         livenessProbe:
           httpGet:
             path: /healthz
@@ -63,10 +64,13 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
-        resources: {{- toYaml .Values.sequencerController.manager.resources | nindent 10
+        resources: {{- toYaml .Values.sequencer.resources | nindent 10
           }}
-        securityContext: {{- toYaml .Values.sequencerController.manager.containerSecurityContext
-          | nindent 10 }}
+        securityContext: 
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert

@@ -8,9 +8,11 @@ metadata:
     app.kubernetes.io/component: webhook
     app.kubernetes.io/part-of: sequencer
 spec:
-  type: {{ .Values.webhookService.type }}
+  type: ClusterIP
   selector:
     control-plane: sequencer-controller
     {{- include "operator.labels" . | nindent 4 }}
   ports:
-	{{- .Values.webhookService.ports | toYaml | nindent 2 }}
+    - port: 443
+      protocol: TCP
+      targetPort: 9443

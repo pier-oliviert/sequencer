@@ -9,5 +9,5 @@ data:
   BUILD_CACHE_SVC: {{ include "operator.fullname" . }}-build-cache
   CONTROLLER_SERVICE_ACCOUNT: {{ include "operator.fullname" . }}-controller
   BUILDKITD_CONFIG_NAME: {{ include "operator.fullname" . }}-buildkitd
-  BUILDER_IMAGE: {{ .Values.sequencerController.builderImage | quote }}
-  BUILDKIT_VERSION: {{ .Values.sequencerController.buildkitVersion | quote }}
+  BUILDER_IMAGE: {{ .Values.builder.image | quote }}
+  BUILDKIT_VERSION: {{ .Values.builder.buildkitVersion | quote }}
