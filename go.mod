@@ -15,6 +15,7 @@ require (
 	github.com/cloudflare/cloudflare-go v0.98.0
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/google/go-containerregistry v0.19.0
+	github.com/google/go-github/v64 v64.0.0
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/onsi/ginkgo/v2 v2.17.2
 	github.com/onsi/gomega v1.33.1

@@ -60,3 +60,16 @@ dns:
   serviceAccount:
     annotations: {}
   env:
+
+github:
+  enabled: false
+  image: pothibo/sequencer-github:0.0.1
+  pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+  replicas: 1

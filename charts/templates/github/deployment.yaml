@@ -1,0 +1,72 @@
+{{- if .Values.github.enabled }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "operator.fullname" . }}-github
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: github
+    app.kubernetes.io/instance: {{ include "operator.fullname" . }}-github
+    app.kubernetes.io/component: cert-manager
+    app.kubernetes.io/part-of: sequencer
+    {{- include "operator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.github.replicas }}
+  selector:
+    matchLabels:
+      {{ include "operator.labels" . | nindent 6 }}
+      app.kubernetes.io/name: github
+      app.kubernetes.io/instance: {{ include "operator.fullname" . }}-github
+  template:
+    metadata:
+      labels:
+        {{ include "operator.labels" . | nindent 8 }}
+        app.kubernetes.io/name: github
+        app.kubernetes.io/instance: {{ include "operator.fullname" . }}-github
+    spec:
+      serviceAccountName: {{ include "operator.fullname" . }}-github
+      containers:
+        - name: github
+          image: {{ .Values.github.image }}
+          imagePullPolicy: {{ .Values.github.pullPolicy }}
+          args:
+            - --leader-elect
+          env:
+            - name: KUBERNETES_CLUSTER_DOMAIN
+              value: cluster.local
+              {{- with .Values.github.env }}
+                {{ . toYaml | indent 12 }}
+              {{- end }}
+          {{- with .Values.github.resources }}
+          resources: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+      {{- with .Values.github.nodeSelector }}
+      nodeSelector:
+        {{ toYaml . | indent 8 }}
+      {{- end }}
+
+      {{- with .Values.github.affinity }}
+      affinity:
+        {{ toYaml . | indent 8 }}
+      {{- end }}
+
+      {{- with .Values.github.tolerations }}
+      tolerations:
+        {{ toYaml . | indent 8 }}
+      {{- end }}
+
+{{- end }}

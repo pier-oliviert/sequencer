@@ -30,7 +30,7 @@ spec:
       containers:
       - env:
         - name: KUBERNETES_CLUSTER_DOMAIN
-          value: {{ quote .Values.kubernetesClusterDomain }}
+          value: cluster.local
         image: {{ .Values.distribution.image }}
         name: distribution
         resources: {{- toYaml .Values.distribution.buildCache.resources | nindent 10 }}

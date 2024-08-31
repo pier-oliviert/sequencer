@@ -1,0 +1,35 @@
+{{ if .Values.github.enabled }}
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "operator.fullname" . }}:github
+  labels:
+    app: {{ include "operator.fullname" . }}-github
+rules:
+  - apiGroups:
+      - se.quencer.io
+    resources:
+      - workspaces/finalizers
+      - workspaces/status
+    verbs:
+      - get
+      - patch
+  - apiGroups:
+      - se.quencer.io
+    resources:
+      - workspaces
+    verbs:
+      - patch # This patch is required as it will edit the annotations to create a deployment.
+      - get
+      - list
+      - watch
+  - apiGroups:
+    - ""
+    resources:
+    - events
+    verbs:
+    - create
+    - patch
+
+{{- end }}
