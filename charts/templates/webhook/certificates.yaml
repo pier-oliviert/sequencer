@@ -7,9 +7,8 @@ metadata:
   {{- include "operator.labels" . | nindent 4 }}
 spec:
   dnsNames:
-  - '{{ include "operator.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc'
-  - '{{ include "operator.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc.{{
-    .Values.kubernetesClusterDomain }}'
+  - {{ include "operator.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc
+  - {{ include "operator.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc.cluster.local
   issuerRef:
     kind: ClusterIssuer
     name: '{{ include "operator.fullname" . }}-selfsigned-issuer'
